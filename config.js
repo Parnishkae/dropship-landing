@@ -5,7 +5,7 @@ const product = {
   subtitle: "Умная бутылка с отображением температуры",
 
   image:
-    "https://images.unsplash.com/photo-1602143407151-7111542de6e8?q=80&w=1200&auto=format&fit=crop",
+    "https://img.kwcdn.com/product/open/bde1bbd3046743648cb20cb051c0ec63-goods.jpeg?imageView2/2/w/800/q/70/format/avif",
 
   benefits: [
     {
