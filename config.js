@@ -1,6 +1,6 @@
 const product = {
 
-  title: "YarBottle",
+  title: "YayayayBottle",
 
   subtitle: "Умная бутылка с отображением температуры",
 
