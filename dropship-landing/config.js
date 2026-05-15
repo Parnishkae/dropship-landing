@@ -1,8 +1,8 @@
 const product = {
 
-  title: "YarBottle",
+  title: "Афигеная футболка",
 
-  subtitle: "Умная бутылка с отображением температуры",
+  subtitle: "Классная футболка для спорта и отдыха",
 
   image: [
     "./images/gorlo.png",
