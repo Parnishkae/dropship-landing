@@ -4,11 +4,7 @@ const product = {
 
   subtitle: "Классная футболка для спорта и отдыха",
 
-  image: [
-    "./images/gorlo.png",
-    "../images/t-shirt.png",
-    "../images/thsirt.png"
-  ],
+  image: "./images/t-shirt.png",
   price: "550 грн.",
 
   benefits: [
