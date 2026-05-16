@@ -6,6 +6,8 @@ const product = {
 
   image: "./images/t-shirt.png",
   price: "550 грн.",
+  
+image: "./images/thsirt.png",
 
   benefits: [
     {
