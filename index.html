@@ -1,89 +1,114 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <title>Smart Bottle</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="style.css"/>
+  <title>NOT BROKE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+
 </head>
-<body>
 
-  <!-- HERO -->
+<body>
 
   <section class="hero">
 
     <div class="container">
 
+      <div class="hero-badge">
+        LIMITED DROP
+      </div>
+
       <h1 id="product-title"></h1>
 
-     <p class="subtitle" id="product-subtitle">
-        Умная бутылка для воды с отображением температуры
-      </p>
+      <p class="subtitle" id="product-subtitle"></p>
 
-    <img id="product-image" src="./images/t-shirt.png" alt="Product Image"/>
+      <img id="product-image" alt="Product Image" />
 
-       <p class="price" id="product-price">550 грн.</p>
+      <p class="price" id="product-price"></p>
 
-      <button>Заказать сейчас</button>
+      <button class="main-btn">
+        Заказать сейчас
+      </button>
 
     </div>
 
   </section>
 
-  <!-- BENEFITS -->
+  <section class="benefits">
 
-  <div class="benefits-grid" id="benefits-container"></div>
+    <div class="container">
 
-  <!-- REVIEWS -->
+      <div class="benefits-grid" id="benefits-container"></div>
 
-  <div id="reviews-container"></div>
+    </div>
 
-  <!-- CTA -->
+  </section>
 
-<form id="lead-form">
+  <section class="reviews">
 
-  <input
-    type="text"
-    id="name"
-    placeholder="Ваше имя"
-    required
-  />
+    <div class="container">
 
-  <input
-    type="text"
-    id="phone"
-    placeholder="Телефон"
-    required
-  />
+      <h2 class="section-title">
+        Отзывы
+      </h2>
 
-  <button type="submit">
-    Отправить заявку
-  </button>
+      <div id="reviews-container"></div>
 
-</form>
+    </div>
+
+  </section>
 
   <section class="cta">
 
     <div class="container">
 
-      <h2>Закажить прямо сейчас
-        Осталось всего 10 штук!</h2>
+      <h2>
+        Осталось ограниченное количество
+      </h2>
 
-      <button>Оставить заявку</button>
+      <p class="cta-text">
+        Успей заказать до следующего дропа
+      </p>
+
+      <form id="lead-form">
+
+        <input
+          type="text"
+          id="name"
+          placeholder="Ваше имя"
+          required
+        />
+
+        <input
+          type="text"
+          id="phone"
+          placeholder="Телефон"
+          required
+        />
+
+        <button type="submit" class="main-btn">
+          Оставить заявку
+        </button>
+
+      </form>
 
     </div>
 
   </section>
-<script src="config.js"></script>
-<script src="script.js"></script>
 
+  <script src="config.js"></script>
   <script src="script.js"></script>
 
 </body>
+
 </html>
