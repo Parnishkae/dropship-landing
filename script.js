@@ -46,10 +46,6 @@ product.reviews.forEach(review => {
   reviewsContainer.appendChild(card);
 });
 
-const TOKEN = "8710918352:AAHIVYwtdJ7Md16e0enYOSHbOYUb8R-eK9g";
-const CHAT_ID = "1052890619";
-
-
 
 const form =
   document.getElementById("lead-form");
