@@ -22,7 +22,7 @@ section {
 }
 
 .hero {
-  text-align: center;
+  padding: 120px 0;
 }
 
 .hero img {
@@ -43,11 +43,14 @@ h1 {
 }
 
 button {
-  padding: 15px 30px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 16px;
+  background: white;
+  color: black;
+  font-weight: 700;
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: scale(1.03);
 }
 
 .benefits-grid {
@@ -60,7 +63,7 @@ button {
 .card,
 .review-card {
   background: #1b1b1b;
-  padding: 25px;
+  padding: 35px;
   border-radius: 20px;
 }
 
