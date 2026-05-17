@@ -4,7 +4,7 @@ const product = {
 
   subtitle: "Oversized streetwear для тех, кто привык выделяться",
 
-  image: "./images/mocaup.png",
+  image: ["./images/mocaup.png", "./images/t-shirt.png"],
 
   price: "599 грн",
 
