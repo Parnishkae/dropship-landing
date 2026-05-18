@@ -680,9 +680,6 @@ footer {
 </footer>
 
 <script>
-// ── CONFIG (замени TOKEN и CHAT_ID) ──
-const TOKEN = 'env.BOT_TOKEN';
-const CHAT_ID = 'env.CHAT_ID';
 
 // ── CURSOR ──
 const cursor = document.getElementById('cursor');
@@ -758,18 +755,36 @@ document.getElementById('lead-form').addEventListener('submit', async (e) => {
 
   const message = `🔥 Новая заявка!\n\nИмя: ${name}\nТелефон: ${phone}\nТовар: NOT BROKE — 599 грн`;
 
-  try {
-    const res = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CHAT_ID, text: message })
-    });
-    if (!res.ok) throw new Error();
-    document.getElementById('lead-form').style.display = 'none';
-    document.getElementById('success-msg').classList.add('show');
-  } catch {
-    alert('Ошибка при отправке. Попробуйте позже.');
-  }
+ try {
+
+  const res = await fetch('/api/send', {
+
+    method: 'POST',
+
+    headers: {
+      'Content-Type': 'application/json'
+    },
+
+    body: JSON.stringify({
+      name,
+      phone,
+      product: 'NOT BROKE — 599 грн'
+    })
+
+  });
+
+  if (!res.ok) throw new Error();
+
+  document.getElementById('lead-form').style.display = 'none';
+
+  document.getElementById('success-msg')
+    .classList.add('show');
+
+} catch {
+
+  alert('Ошибка при отправке. Попробуйте позже.');
+
+}
 });
 </script>
 </body>
