@@ -216,4 +216,21 @@ input:focus {
   opacity: 1;
   transform: scale(1.05);
 }
+.image-section {
+  padding-top: 0;
+}
+
+.secondary-image {
+
+  width: 100%;
+
+  max-width: 700px;
+
+  display: block;
+
+  margin: auto;
+
+  border-radius: 24px;
+
+}
 }

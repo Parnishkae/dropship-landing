@@ -4,44 +4,10 @@ document.getElementById("product-title").textContent =
 document.getElementById("product-subtitle").textContent =
   product.subtitle;
 
-const mainImage =
-  document.getElementById("main-image");
-
-mainImage.src =
+document.getElementById("product-image").src =
   product.images[0];
 
-
-
-const thumbnails =
-  document.getElementById("thumbnails");
-
-
-
-product.images.forEach(image => {
-
-  const thumb =
-    document.createElement("img");
-
-  thumb.src = image;
-
-  thumb.classList.add("thumb");
-
-
-
-  thumb.addEventListener("click", () => {
-
-    mainImage.src = image;
-
-  });
-
-
-
-  thumbnails.appendChild(thumb);
-
-});
-
-
-
+  
 const benefitsContainer =
   document.getElementById("benefits-container");
 

@@ -6,9 +6,9 @@ const product = {
 
   images: [
   "./images/t-shirt.png",
-  "./images/thirt.png",
+  "./images/thsirt.png",
   "./images/gorlo.png",
-  "./images/moca.png"
+  "./images/mocaup.png"
 ],
 
   price: "599 грн",
