@@ -4,7 +4,12 @@ const product = {
 
   subtitle: "Oversized streetwear для тех, кто привык выделяться",
 
-  image: ["./images/mocaup.png", "./images/t-shirt.png"],
+  images: [
+  "./images/t-shirt.png",
+  "./images/thirt.png",
+  "./images/gorlo.png",
+  "./images/moca.png"
+],
 
   price: "599 грн",
 
