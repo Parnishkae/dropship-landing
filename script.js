@@ -106,29 +106,19 @@ form.addEventListener("submit", async (e) => {
     alert("Ошибка при отправке заявки. Попробуйте позже.");
     console.error("Form submission error:", error);
   }
+});
 
-function scrollToOrder() {  
-
-  document
-    .getElementById("order")
-    .scrollIntoView({
-
-      behavior: "smooth"
-
-    });
-
+function scrollToOrder() {
+  document.getElementById("order").scrollIntoView({
+    behavior: "smooth"
+  });
 }
-const heroButton =
-  document.getElementById("hero-button");
 
-heroButton.addEventListener("click", () => {
-
-  document
-    .getElementById("order")
-    .scrollIntoView({
-
-      behavior: "smooth"
-
+window.addEventListener("DOMContentLoaded", () => {
+  const heroButton = document.getElementById("hero-button");
+  if (heroButton) {
+    heroButton.addEventListener("click", () => {
+      scrollToOrder();
     });
-
-});});
+  }
+});
