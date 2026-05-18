@@ -7,7 +7,7 @@ document.getElementById("product-subtitle").textContent =
 document.getElementById("product-image").src =
   product.images[0];
 
-  
+
 const benefitsContainer =
   document.getElementById("benefits-container");
 
@@ -106,4 +106,16 @@ form.addEventListener("submit", async (e) => {
     alert("Ошибка при отправке заявки. Попробуйте позже.");
     console.error("Form submission error:", error);
   }
+
+function scrollToOrder() {  
+
+  document
+    .getElementById("order")
+    .scrollIntoView({
+
+      behavior: "smooth"
+
+    });
+
+}
 });
