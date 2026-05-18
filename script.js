@@ -118,4 +118,17 @@ function scrollToOrder() {
     });
 
 }
-});
+const heroButton =
+  document.getElementById("hero-button");
+
+heroButton.addEventListener("click", () => {
+
+  document
+    .getElementById("order")
+    .scrollIntoView({
+
+      behavior: "smooth"
+
+    });
+
+});});
