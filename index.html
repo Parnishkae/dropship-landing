@@ -1,129 +1,776 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOT BROKE — Limited Drop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
-  <meta charset="UTF-8" />
+:root {
+  --black: #080808;
+  --white: #f2ede8;
+  --grey: #1a1a1a;
+  --mid: #2e2e2e;
+  --muted: #666;
+  --accent: #c8ff00;
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body: 'Barlow', sans-serif;
+}
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  cursor: none;
+}
 
-  <title>NOT BROKE</title>
+/* ── CUSTOM CURSOR ── */
+#cursor {
+  position: fixed; z-index: 9999; pointer-events: none;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent);
+  transform: translate(-50%, -50%);
+  transition: transform .1s, width .25s, height .25s, background .25s;
+  mix-blend-mode: difference;
+}
+#cursor.hover { width: 40px; height: 40px; }
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+/* ── GRAIN OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+  opacity: .025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px;
+}
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+/* ── MARQUEE TICKER ── */
+.ticker {
+  overflow: hidden; border-top: 1px solid #1f1f1f; border-bottom: 1px solid #1f1f1f;
+  padding: .55rem 0; background: var(--black);
+  position: relative; z-index: 10;
+}
+.ticker-track {
+  display: flex; gap: 0; white-space: nowrap;
+  animation: ticker 18s linear infinite;
+}
+.ticker-item {
+  font-family: var(--font-display);
+  font-size: .78rem; font-weight: 600; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--muted); padding: 0 2.5rem;
+  flex-shrink: 0;
+}
+.ticker-item.accent { color: var(--accent); }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-  <link rel="stylesheet" href="style.css" />
+/* ── HERO ── */
+#hero {
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative; overflow: hidden;
+}
 
+.hero-left {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 7rem 4rem 5rem 5vw;
+  position: relative; z-index: 2;
+}
+
+.hero-tag {
+  display: inline-flex; align-items: center; gap: .6rem;
+  font-family: var(--font-display);
+  font-size: .72rem; font-weight: 700; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 2.5rem;
+}
+.hero-tag::before {
+  content: ''; display: block;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .4; transform: scale(.6); }
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 10vw, 9.5rem);
+  font-weight: 900; line-height: .88;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+.hero-title .outline {
+  -webkit-text-stroke: 1.5px var(--white);
+  color: transparent;
+}
+.hero-title .accent-word { color: var(--accent); }
+
+.hero-sub {
+  font-size: 1rem; font-weight: 300; line-height: 1.65;
+  color: rgba(242,237,232,.5);
+  max-width: 340px; margin-bottom: 3rem;
+}
+
+.price-row {
+  display: flex; align-items: baseline; gap: 1.2rem; margin-bottom: 2.5rem;
+}
+.price-main {
+  font-family: var(--font-display);
+  font-size: 3.5rem; font-weight: 800; line-height: 1; letter-spacing: -.02em;
+}
+.price-note {
+  font-size: .8rem; color: var(--muted); letter-spacing: .05em; text-transform: uppercase;
+}
+
+.cta-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+
+.btn-main {
+  background: var(--accent); color: #000;
+  border: none; cursor: none;
+  font-family: var(--font-display);
+  font-size: 1rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase;
+  padding: 1.1rem 2.8rem;
+  transition: transform .2s, box-shadow .2s;
+  position: relative; overflow: hidden;
+}
+.btn-main::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,.15);
+  transform: translateX(-100%) skewX(-20deg);
+  transition: transform .4s;
+}
+.btn-main:hover::after { transform: translateX(110%) skewX(-20deg); }
+.btn-main:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(200,255,0,.3); }
+
+.scroll-hint {
+  display: flex; align-items: center; gap: .6rem;
+  font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; color: var(--muted);
+  margin-top: 4rem;
+}
+.scroll-hint::before {
+  content: '';
+  display: block; width: 1px; height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--muted));
+  animation: scrollline 2s ease-in-out infinite;
+}
+@keyframes scrollline {
+  0%, 100% { opacity: .3; } 50% { opacity: 1; }
+}
+
+.hero-right {
+  position: relative; overflow: hidden;
+  background: var(--grey);
+}
+.hero-right::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to right, var(--black) 0%, transparent 20%),
+              linear-gradient(to top, var(--black) 0%, transparent 30%);
+}
+
+.hero-img-main {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block;
+  filter: grayscale(15%) contrast(1.05);
+  transform: scale(1.02);
+  transition: transform 8s ease;
+}
+.hero-right:hover .hero-img-main { transform: scale(1); }
+
+.hero-number {
+  position: absolute; bottom: 2rem; right: 2rem; z-index: 2;
+  font-family: var(--font-display);
+  font-size: 8rem; font-weight: 900; line-height: 1;
+  color: rgba(242,237,232,.04);
+  letter-spacing: -.05em;
+  pointer-events: none;
+}
+
+/* ── SECTION DIVIDER ── */
+.divider {
+  height: 1px; background: linear-gradient(to right, transparent, #2a2a2a 30%, #2a2a2a 70%, transparent);
+  margin: 0;
+}
+
+/* ── BENEFITS ── */
+#benefits {
+  padding: 7rem 5vw;
+  max-width: 1300px; margin: 0 auto;
+}
+
+.section-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 4rem;
+}
+.section-num {
+  font-family: var(--font-display);
+  font-size: .75rem; font-weight: 700; letter-spacing: .3em;
+  text-transform: uppercase; color: var(--accent);
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 900; text-transform: uppercase; letter-spacing: -.02em;
+  line-height: 1;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: #1a1a1a;
+  border: 1px solid #1a1a1a;
+}
+
+.benefit-card {
+  background: var(--black);
+  padding: 3rem 2.5rem;
+  position: relative; overflow: hidden;
+  transition: background .3s;
+}
+.benefit-card:hover { background: #0e0e0e; }
+
+.benefit-card::before {
+  content: attr(data-num);
+  position: absolute; top: -1rem; right: 1.5rem;
+  font-family: var(--font-display);
+  font-size: 6rem; font-weight: 900;
+  color: rgba(200,255,0,.04); line-height: 1;
+  pointer-events: none;
+}
+
+.benefit-icon {
+  width: 36px; height: 36px; margin-bottom: 1.8rem;
+  border: 1px solid #2a2a2a; display: flex; align-items: center; justify-content: center;
+}
+.benefit-icon svg { width: 18px; height: 18px; stroke: var(--accent); }
+
+.benefit-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .04em; margin-bottom: .8rem;
+}
+.benefit-card p {
+  font-size: .88rem; font-weight: 300; color: rgba(242,237,232,.45);
+  line-height: 1.7;
+}
+
+/* ── PRODUCT SHOWCASE ── */
+#showcase {
+  padding: 0 5vw 7rem;
+  max-width: 1300px; margin: 0 auto;
+}
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px; background: #1a1a1a; border: 1px solid #1a1a1a;
+}
+
+.showcase-img-wrap {
+  aspect-ratio: 4/5; overflow: hidden;
+  position: relative; background: #111;
+}
+.showcase-img-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .6s ease; display: block;
+  filter: grayscale(10%);
+}
+.showcase-img-wrap:hover img { transform: scale(1.04); }
+
+.showcase-img-wrap.tall { aspect-ratio: 3/4; }
+
+.img-label {
+  position: absolute; bottom: 1.2rem; left: 1.2rem;
+  font-family: var(--font-display);
+  font-size: .65rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase;
+  background: rgba(8,8,8,.7); backdrop-filter: blur(8px);
+  padding: .35rem .7rem; color: rgba(242,237,232,.6);
+}
+
+/* ── REVIEWS ── */
+#reviews {
+  padding: 7rem 5vw;
+  background: var(--grey);
+  border-top: 1px solid #222; border-bottom: 1px solid #222;
+}
+
+.reviews-inner { max-width: 1300px; margin: 0 auto; }
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: #222; border: 1px solid #222;
+  margin-top: 4rem;
+}
+
+.review-card {
+  background: var(--grey);
+  padding: 2.5rem;
+  position: relative;
+  transition: background .3s;
+}
+.review-card:hover { background: #202020; }
+
+.review-stars {
+  display: flex; gap: 3px; margin-bottom: 1.5rem;
+}
+.star { width: 12px; height: 12px; background: var(--accent); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+
+.review-text {
+  font-size: .95rem; font-weight: 300; line-height: 1.75;
+  color: rgba(242,237,232,.75);
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+.review-author {
+  font-family: var(--font-display);
+  font-size: .75rem; font-weight: 700; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--muted);
+}
+
+/* ── ORDER FORM ── */
+#order {
+  padding: 9rem 5vw;
+  position: relative; overflow: hidden;
+}
+
+#order::before {
+  content: 'ORDER';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(8rem, 20vw, 22rem);
+  font-weight: 900; text-transform: uppercase; letter-spacing: -.04em;
+  color: rgba(242,237,232,.018); pointer-events: none; white-space: nowrap;
+  user-select: none;
+}
+
+.order-inner {
+  max-width: 560px; margin: 0 auto; text-align: center;
+  position: relative; z-index: 1;
+}
+
+.order-tag {
+  font-family: var(--font-display);
+  font-size: .72rem; font-weight: 700; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--accent); display: inline-block; margin-bottom: 1.5rem;
+}
+
+.order-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  font-weight: 900; text-transform: uppercase; letter-spacing: -.02em; line-height: .95;
+  margin-bottom: 1.2rem;
+}
+
+.order-sub {
+  font-size: .9rem; font-weight: 300; color: rgba(242,237,232,.45);
+  line-height: 1.7; margin-bottom: 3.5rem;
+}
+
+.form-group {
+  position: relative; margin-bottom: 1rem;
+}
+
+.form-group input {
+  width: 100%;
+  background: transparent;
+  border: none; border-bottom: 1px solid #2a2a2a;
+  color: var(--white);
+  font-family: var(--font-body); font-size: 1rem; font-weight: 300;
+  padding: 1.1rem 0;
+  transition: border-color .2s;
+  outline: none;
+  cursor: none;
+}
+.form-group input::placeholder { color: var(--muted); }
+.form-group input:focus { border-bottom-color: var(--accent); }
+
+.form-group label {
+  position: absolute; top: 1.1rem; left: 0;
+  font-size: .65rem; font-weight: 700; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--muted); pointer-events: none;
+  transition: top .2s, font-size .2s, color .2s;
+}
+.form-group input:focus ~ label,
+.form-group input:not(:placeholder-shown) ~ label {
+  top: -.6rem; font-size: .6rem; color: var(--accent);
+}
+
+.btn-submit {
+  width: 100%; margin-top: 2rem;
+  background: var(--white); color: var(--black);
+  border: none; cursor: none;
+  font-family: var(--font-display);
+  font-size: 1.05rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase;
+  padding: 1.3rem;
+  position: relative; overflow: hidden;
+  transition: transform .2s;
+}
+.btn-submit::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--accent);
+  transform: translateX(-100%);
+  transition: transform .4s cubic-bezier(.4,0,.2,1);
+}
+.btn-submit:hover::after { transform: translateX(0); }
+.btn-submit:hover { transform: translateY(-1px); }
+.btn-submit span { position: relative; z-index: 1; }
+
+.stock-note {
+  display: flex; align-items: center; justify-content: center; gap: .6rem;
+  margin-top: 1.5rem;
+  font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
+.stock-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+
+/* ── SUCCESS STATE ── */
+.success-msg {
+  display: none; text-align: center; padding: 2rem;
+}
+.success-msg.show { display: block; }
+.success-icon {
+  font-size: 3rem; margin-bottom: 1rem;
+}
+.success-msg h3 {
+  font-family: var(--font-display);
+  font-size: 2rem; font-weight: 800; text-transform: uppercase; margin-bottom: .5rem;
+}
+.success-msg p { font-size: .88rem; color: var(--muted); }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid #1a1a1a;
+  padding: 2.5rem 5vw;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+}
+
+.footer-logo {
+  font-family: var(--font-display);
+  font-size: 1.4rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase;
+}
+
+.footer-copy {
+  font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+
+/* ── SCROLL REVEAL ── */
+.reveal {
+  opacity: 0; transform: translateY(40px);
+  transition: opacity .8s ease, transform .8s ease;
+}
+.reveal.in { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  #hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-left { padding: 6rem 6vw 3rem; }
+  .hero-right { height: 60vw; }
+  .benefits-grid { grid-template-columns: 1fr; }
+  .showcase-grid { grid-template-columns: 1fr; }
+  .reviews-grid { grid-template-columns: 1fr; }
+  .section-header { flex-direction: column; gap: .8rem; }
+}
+
+@media (max-width: 600px) {
+  .hero-title { font-size: 4.2rem; }
+  .hero-left { padding: 5rem 5vw 3rem; }
+  #benefits, #showcase, #reviews, #order { padding-left: 5vw; padding-right: 5vw; }
+  footer { flex-direction: column; text-align: center; }
+}
+</style>
 </head>
-
 <body>
 
-  <section class="hero">
+<div id="cursor"></div>
 
-    <div class="container">
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track" id="ticker-track">
+    <!-- filled by JS -->
+  </div>
+</div>
 
-      <div class="hero-badge">
-        LIMITED DROP
-      </div>
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <p class="hero-tag reveal">Limited Drop — 2025</p>
 
-      <h1 id="product-title"></h1>
+    <h1 class="hero-title reveal reveal-delay-1">
+      NOT<br>
+      <span class="outline">BRO</span><span class="accent-word">KE</span>
+    </h1>
 
-      <p class="subtitle" id="product-subtitle"></p>
+    <p class="hero-sub reveal reveal-delay-2">
+      Oversized streetwear для тех, кто привык выделяться. Плотный хлопок, чистый стиль.
+    </p>
 
-      <img id="product-image" alt="Product Image" />
-
-      <p class="price" id="product-price"></p>
-
-<button
-  class="main-btn"
-  id="hero-button"
->
-  Заказать сейчас
-</button>
-
+    <div class="price-row reveal reveal-delay-2">
+      <span class="price-main">599 грн</span>
+      <span class="price-note">Бесплатная доставка</span>
     </div>
 
-  </section>
-
-  <section class="benefits">
-
-    <div class="container">
-
-      <div class="benefits-grid" id="benefits-container"></div>
-
+    <div class="cta-row reveal reveal-delay-3">
+      <button class="btn-main" onclick="scrollToOrder()">
+        Заказать сейчас
+      </button>
     </div>
 
-  </section>
-<section class="image-section">
-
-  <div class="container">
-
-    <img
-      src="./images/mocaup.png"
-      class="secondary-image"
-      alt="Streetwear Style"
-    />
-
+    <div class="scroll-hint reveal reveal-delay-3">Скролл вниз</div>
   </div>
 
+  <div class="hero-right">
+    <img class="hero-img-main" src="mocaup.png" alt="NOT BROKE T-Shirt">
+    <div class="hero-number">01</div>
+  </div>
 </section>
-  <section class="reviews">
 
-    <div class="container">
+<div class="divider"></div>
 
-      <h2 class="section-title">
-        Отзывы
-      </h2>
+<!-- TICKER 2 -->
+<div class="ticker">
+  <div class="ticker-track" id="ticker-track-2"></div>
+</div>
 
-      <div id="reviews-container"></div>
-
+<!-- BENEFITS -->
+<section>
+  <div id="benefits">
+    <div class="section-header reveal">
+      <span class="section-num">01 / Почему мы</span>
+      <h2 class="section-title">Сделано<br>правильно</h2>
     </div>
 
-  </section>
+    <div class="benefits-grid">
+      <div class="benefit-card reveal" data-num="1">
+        <div class="benefit-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>
+        </div>
+        <h3>Oversized Fit</h3>
+        <p>Свободная посадка в современном streetwear стиле. Выверенный крой, который носится так, как должен.</p>
+      </div>
+      <div class="benefit-card reveal reveal-delay-1" data-num="2">
+        <div class="benefit-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.091z"/></svg>
+        </div>
+        <h3>Premium Cotton</h3>
+        <p>Плотный и приятный материал для ежедневного комфорта. Держит форму после стирки.</p>
+      </div>
+      <div class="benefit-card reveal reveal-delay-2" data-num="3">
+        <div class="benefit-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <h3>Minimal Design</h3>
+        <p>Чистый стиль, который выглядит дороже своей цены. Никаких лишних деталей.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <section class="cta" id="order">
+<div class="divider"></div>
 
-    <div class="container">
+<!-- SHOWCASE -->
+<section>
+  <div id="showcase">
+    <div class="section-header reveal">
+      <span class="section-num">02 / Как выглядит</span>
+      <h2 class="section-title">Носи<br>по-настоящему</h2>
+    </div>
+    <div class="showcase-grid">
+      <div class="showcase-img-wrap reveal">
+        <img src="mocaup.png" alt="NOT BROKE flatlay">
+        <span class="img-label">Flatlay / Drop 01</span>
+      </div>
+      <div class="showcase-img-wrap reveal reveal-delay-1">
+        <img src="t-shirt.png" alt="NOT BROKE on street">
+        <span class="img-label">Street / Real Wear</span>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <h2>
-        Осталось ограниченное количество
-      </h2>
+<div class="divider"></div>
 
-      <p class="cta-text">
-        Успей заказать до следующего дропа
-      </p>
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="reviews-inner">
+    <div class="section-header reveal">
+      <span class="section-num">03 / Отзывы</span>
+      <h2 class="section-title">Говорят<br>сами за себя</h2>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card reveal">
+        <div class="review-stars">
+          <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        </div>
+        <p class="review-text">«В жизни выглядит намного дороже чем ожидал. Реально крутая вещь.»</p>
+        <span class="review-author">— Артём</span>
+      </div>
+      <div class="review-card reveal reveal-delay-1">
+        <div class="review-stars">
+          <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        </div>
+        <p class="review-text">«Очень приятная ткань и идеальный oversized. Уже второй заказ.»</p>
+        <span class="review-author">— Максим</span>
+      </div>
+      <div class="review-card reveal reveal-delay-2">
+        <div class="review-stars">
+          <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        </div>
+        <p class="review-text">«Поймал уже несколько вопросов где купил. Всем советую.»</p>
+        <span class="review-author">— Данил</span>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <form id="lead-form">
+<!-- ORDER -->
+<section id="order">
+  <div class="order-inner">
+    <span class="order-tag reveal">Осталось ограниченное количество</span>
+    <h2 class="order-title reveal">Оставь<br>заявку</h2>
+    <p class="order-sub reveal">Напишем тебе в течение часа. Уточним размер и оформим доставку.</p>
 
-        <input
-          type="text"
-          id="name"
-          placeholder="Ваше имя"
-          required
-        />
+    <form id="lead-form" class="reveal">
+      <div class="form-group">
+        <input type="text" id="name" placeholder=" " required>
+        <label for="name">Ваше имя</label>
+      </div>
+      <div class="form-group">
+        <input type="tel" id="phone" placeholder=" " required>
+        <label for="phone">Телефон / Telegram</label>
+      </div>
+      <button type="submit" class="btn-submit">
+        <span>Отправить заявку →</span>
+      </button>
+    </form>
 
-        <input
-          type="text"
-          id="phone"
-          placeholder="Телефон"
-          required
-        />
-
-        <button type="submit" class="main-btn">
-          Оставить заявку
-        </button>
-
-      </form>
-
+    <div class="success-msg" id="success-msg">
+      <div class="success-icon">✓</div>
+      <h3>Заявка отправлена!</h3>
+      <p>Напишем тебе в ближайшее время.</p>
     </div>
 
-  </section>
+    <p class="stock-note reveal">
+      <span class="stock-dot"></span>
+      Успей до следующего дропа
+    </p>
+  </div>
+</section>
 
-  <script src="config.js"></script>
-  <script src="script.js"></script>
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">Not Broke</span>
+  <span class="footer-copy">© 2025 — Limited Drop</span>
+</footer>
 
+<script>
+// ── CONFIG (замени TOKEN и CHAT_ID) ──
+const TOKEN = 'ВАШ_ТОКЕН';
+const CHAT_ID = 'ВАШ_CHAT_ID';
+
+// ── CURSOR ──
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+document.querySelectorAll('button, a, input').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+});
+
+// ── TICKER ──
+const tickerItems = [
+  { text: 'NOT BROKE', accent: true },
+  { text: 'Limited Drop 2025', accent: false },
+  { text: 'Oversized Streetwear', accent: false },
+  { text: 'Premium Cotton', accent: false },
+  { text: '599 грн', accent: true },
+  { text: 'Free Delivery', accent: false },
+  { text: 'NOT BROKE', accent: true },
+  { text: 'Limited Drop 2025', accent: false },
+  { text: 'Oversized Streetwear', accent: false },
+  { text: 'Premium Cotton', accent: false },
+  { text: '599 грн', accent: true },
+  { text: 'Free Delivery', accent: false },
+];
+
+function buildTicker(id, items) {
+  const el = document.getElementById(id);
+  const doubled = [...items, ...items];
+  el.innerHTML = doubled.map(i =>
+    `<span class="ticker-item${i.accent ? ' accent' : ''}">${i.accent ? '✦ ' : ''}${i.text}</span>`
+  ).join('');
+}
+buildTicker('ticker-track', tickerItems);
+
+const ticker2Items = [
+  { text: 'Streetwear', accent: false },
+  { text: 'Minimal Design', accent: true },
+  { text: 'Everyday Wear', accent: false },
+  { text: 'Drop 01', accent: true },
+  { text: 'Ukraine Made', accent: false },
+  { text: 'Not For Everyone', accent: true },
+  { text: 'Streetwear', accent: false },
+  { text: 'Minimal Design', accent: true },
+  { text: 'Everyday Wear', accent: false },
+  { text: 'Drop 01', accent: true },
+  { text: 'Ukraine Made', accent: false },
+  { text: 'Not For Everyone', accent: true },
+];
+buildTicker('ticker-track-2', ticker2Items);
+document.getElementById('ticker-track-2').style.animationDirection = 'reverse';
+
+// ── SCROLL REVEAL ──
+const revealEls = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.1 });
+revealEls.forEach(el => obs.observe(el));
+
+// ── SCROLL TO ORDER ──
+function scrollToOrder() {
+  document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── FORM ──
+document.getElementById('lead-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  if (!name || !phone) return;
+
+  const message = `🔥 Новая заявка!\n\nИмя: ${name}\nТелефон: ${phone}\nТовар: NOT BROKE — 599 грн`;
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+    });
+    if (!res.ok) throw new Error();
+    document.getElementById('lead-form').style.display = 'none';
+    document.getElementById('success-msg').classList.add('show');
+  } catch {
+    alert('Ошибка при отправке. Попробуйте позже.');
+  }
+});
+</script>
 </body>
-
 </html>
