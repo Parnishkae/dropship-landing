@@ -36,12 +36,12 @@ wrangler.toml         конфиг Cloudflare
 ```bash
 npx wrangler d1 create dropship-db
 ```
-Скопируйте `database_id` из вывода и вставьте в `wrangler.toml` (поле `database_id`).
-
 Примените схему:
 ```bash
 npx wrangler d1 execute dropship-db --remote --file=./schema.sql
 ```
+
+> Базу привязываем к сайту в дашборде (шаг 3), а не в `wrangler.toml` — иначе деплой падает.
 
 ### 2. Задать секреты
 В дашборде Cloudflare Pages → ваш проект → **Settings → Environment variables** (или через CLI `npx wrangler pages secret put <ИМЯ>`):
@@ -60,11 +60,11 @@ npx wrangler d1 execute dropship-db --remote --file=./schema.sql
 > **Как узнать CHAT_ID:** напишите боту, затем откройте `https://api.telegram.org/bot<BOT_TOKEN>/getUpdates` — id чата будет в ответе.
 
 ### 3. Привязать D1 и Workers AI к Pages
-В дашборде проекта: **Settings → Functions**
+В дашборде проекта: **Settings → Functions** (бинды задаются здесь, не в `wrangler.toml`):
 - **D1 database bindings** → добавьте binding `DB` → `dropship-db`
 - **AI bindings** → добавьте binding `AI` (это включает бесплатный Cloudflare Workers AI)
 
-(Либо всё подхватится из `wrangler.toml` при деплое через `wrangler pages deploy`.)
+После добавления биндов нажмите **Retry deployment** (или сделайте любой push) — сайт пересоберётся уже с базой.
 
 ### 4. Настроить контакты магазина
 Отредактируйте `assets/js/config.js` — название, ссылку на Telegram-менеджера, телефон, валюту.

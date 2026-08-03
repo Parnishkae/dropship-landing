@@ -2,30 +2,26 @@ name = "dropship-store"
 compatibility_date = "2024-11-01"
 pages_build_output_dir = "."
 
-# ── Cloudflare D1 (база данных товаров, заказов, статистики) ──
-# Создай базу:  npx wrangler d1 create dropship-db
-# Затем вставь сюда database_id из вывода команды.
-[[d1_databases]]
-binding = "DB"
-database_name = "dropship-db"
-database_id = "REPLACE_WITH_YOUR_DATABASE_ID"
-
-# ── Cloudflare Workers AI (бесплатный ИИ прямо на хостинге) ──
-# Даёт binding env.AI. Модель по умолчанию — Llama 3.3 70B.
-# В дашборде Pages: Settings → Functions → AI bindings → добавить binding "AI".
-[ai]
-binding = "AI"
-
-# ── Переменные окружения / секреты (задаются в дашборде Cloudflare Pages
-#    или через `npx wrangler pages secret put <NAME>`) ──
+# ── Бинды и секреты настраиваются в дашборде Cloudflare Pages ──
+# (Settings → Functions), а НЕ здесь — иначе деплой падает на placeholder-id.
+#
+# D1 database bindings:   binding "DB"  →  база dropship-db
+#   Создать базу:  npx wrangler d1 create dropship-db
+#   Применить схему: npx wrangler d1 execute dropship-db --remote --file=./schema.sql
+#
+# AI bindings:            binding "AI"  →  включает бесплатный Workers AI
+#
+# Environment variables / secrets:
+#   ADMIN_PASSWORD   — пароль для входа в админку (/admin.html)   [обязательно]
+#   AUTH_SECRET      — случайная строка 32+ символов для подписи сессии [обязательно]
 #   BOT_TOKEN        — токен Telegram-бота
 #   CHAT_ID          — id чата/канала, куда падают заявки и отчёты ИИ
-#   ADMIN_PASSWORD   — пароль для входа в админку (/admin.html)
-#   AUTH_SECRET      — случайная строка для подписи сессии (любые 32+ символов)
 #   CRON_SECRET      — секрет для авто-запуска подбора товара по расписанию
-#   TG_WEBHOOK_SECRET— (рекомендуется) секрет для защиты вебхука Telegram-бота
-#   MARKUP           — (необязательно) наценка, по умолчанию 3 (×3)
-#   GEMINI_API_KEY   — (необязательно) бесплатный ключ Google Gemini — если задан,
-#                      ИИ использует Gemini вместо Workers AI (чуть аналитичнее)
+#   TG_WEBHOOK_SECRET— секрет для защиты вебхука Telegram-бота (рекомендуется)
+#   MARKUP           — наценка авто-подбора, по умолчанию 3 (×3)
+#   GEMINI_API_KEY   — (необязательно) бесплатный ключ Google Gemini вместо Workers AI
 #   AI_MODEL         — (необязательно) переопределить модель Workers AI
 #   GEMINI_MODEL     — (необязательно) модель Gemini, по умолчанию gemini-2.0-flash
+#
+# Локальная разработка (бинды через флаги):
+#   npx wrangler pages dev . --d1 DB=dropship-db --ai AI
