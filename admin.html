@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Админ-панель — магазин</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-view" class="login-wrap">
+  <div class="login-card">
+    <div class="logo"><span class="dot"></span>Админ-панель</div>
+    <h1>Вход</h1>
+    <p>Введите пароль администратора, чтобы управлять товарами и статистикой.</p>
+    <form id="login-form">
+      <div class="field">
+        <label for="login-pass">Пароль</label>
+        <input class="input" type="password" id="login-pass" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" type="submit">Войти</button>
+      <div id="login-msg" class="msg info hidden"></div>
+    </form>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-view" class="hidden">
+  <div class="topbar">
+    <div class="topbar-in">
+      <span class="logo"><span class="dot"></span>Админ</span>
+      <div class="tabs">
+        <button class="tab active" data-tab="import">📥 Импорт</button>
+        <button class="tab" data-tab="products">📦 Товары</button>
+        <button class="tab" data-tab="bundles">🎁 Наборы</button>
+        <button class="tab" data-tab="stats">📊 Статистика</button>
+        <button class="tab" data-tab="ai">🤖 ИИ-аналитика</button>
+      </div>
+      <div class="topbar-right">
+        <a class="link-store" href="/" target="_blank">Открыть магазин ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- IMPORT -->
+    <section class="panel active" id="panel-import">
+      <h2 class="sec">Загрузка товаров из XML</h2>
+      <p class="sub">Поддерживаются форматы YML (Yandex Market / Prom / большинство дропшип-поставщиков), Google Merchant (RSS) и произвольные XML-фиды с тегами &lt;offer&gt;, &lt;item&gt; или &lt;product&gt;. Файл обрабатывается прямо в браузере.</p>
+      <div class="card">
+        <div class="drop" id="drop">
+          <strong>Перетащите XML-файл сюда</strong>
+          или нажмите, чтобы выбрать
+          <small>YML • Google Merchant • custom XML</small>
+        </div>
+        <input type="file" id="file-input" accept=".xml,application/xml,text/xml" style="display:none">
+
+        <div class="mode-row">
+          <label><input type="radio" name="mode" value="merge" checked> Дополнить каталог (обновить существующие)</label>
+          <label><input type="radio" name="mode" value="replace"> Заменить весь каталог</label>
+        </div>
+
+        <div id="preview"></div>
+        <div id="import-msg" class="msg info hidden"></div>
+        <div style="margin-top:16px">
+          <button class="btn btn-primary" id="import-btn" disabled>Загрузить в каталог</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="panel" id="panel-products">
+      <h2 class="sec">Товары <span class="sub" style="font-size:.9rem">(<span id="prod-total">0</span>)</span></h2>
+      <p class="sub">Меняйте цену и наличие прямо в таблице. Нажмите на статус, чтобы скрыть/показать товар.</p>
+      <div class="toolbar2">
+        <input class="input" id="prod-search" placeholder="Поиск по названию / категории…">
+        <button class="btn btn-line" id="prod-refresh">Обновить</button>
+        <button class="btn btn-danger" id="prod-clear" style="margin-left:auto">Очистить каталог</button>
+      </div>
+      <div class="card" style="padding:0;overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>Фото</th><th>Название</th><th>Цена</th><th>Статус</th><th></th><th></th></tr></thead>
+          <tbody id="prod-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- BUNDLES -->
+    <section class="panel" id="panel-bundles">
+      <h2 class="sec">Наборы-конструкторы</h2>
+      <p class="sub">Покупатель сам выбирает N товаров из набора — это поднимает средний чек и вовлечённость. Добавьте товары-варианты и задайте цену.</p>
+
+      <div class="card" style="margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          <b>🤖 Telegram-бот сборки наборов</b>
+          <div class="sub" style="margin:2px 0 0" id="tg-status">Статус: проверяю…</div>
+        </div>
+        <button class="btn btn-line" id="tg-connect" style="margin-left:auto">Подключить бота</button>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3 style="font-size:1.05rem;margin-bottom:14px" id="bnd-form-title">Новый набор</h3>
+          <div class="field"><label>Название</label><input class="input" id="bnd-title" placeholder="Набор ухода 3 в 1"></div>
+          <div class="field"><label>Описание</label><textarea class="input" id="bnd-desc" rows="2" placeholder="Собери свой комплект и получи выгоду"></textarea></div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div class="field" style="flex:1;min-width:130px"><label>Сколько выбрать (N)</label><input class="input" id="bnd-pick" type="number" value="3" min="1"></div>
+            <div class="field" style="flex:1;min-width:160px"><label>Режим цены</label>
+              <select class="input" id="bnd-mode">
+                <option value="fixed">Фиксированная за N</option>
+                <option value="sum">Сумма выбранных</option>
+                <option value="discount">Скидка % на выбранные</option>
+              </select>
+            </div>
+          </div>
+          <div class="field" id="bnd-fixed-wrap"><label>Цена набора</label><input class="input" id="bnd-fixed" type="number" value="0"></div>
+          <div class="field hidden" id="bnd-disc-wrap"><label>Скидка, %</label><input class="input" id="bnd-disc" type="number" value="15"></div>
+          <div class="field"><label>Добавить товары-варианты</label><input class="input" id="bnd-search" placeholder="Поиск по каталогу…"></div>
+          <div id="bnd-search-res"></div>
+          <div id="bnd-items" class="bnd-items"></div>
+          <label style="display:flex;gap:8px;align-items:center;margin:14px 0;font-size:.9rem"><input type="checkbox" id="bnd-active" checked> Активен (показывать на сайте)</label>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" id="bnd-save">Сохранить набор</button>
+            <button class="btn btn-line" id="bnd-reset">Очистить</button>
+          </div>
+          <div id="bnd-msg" class="msg info hidden"></div>
+        </div>
+        <div class="card">
+          <h3 style="font-size:1.05rem;margin-bottom:14px">Наборы на сайте</h3>
+          <div id="bnd-list"><div class="state">—</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="panel" id="panel-stats">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div><h2 class="sec">Статистика магазина</h2></div>
+        <select class="input" id="stats-days" style="width:auto;margin-left:auto">
+          <option value="7">7 дней</option>
+          <option value="30" selected>30 дней</option>
+          <option value="90">90 дней</option>
+        </select>
+      </div>
+      <p class="sub">Просмотры, заказы, выручка и воронка конверсии. Данные собираются автоматически при посещении витрины.</p>
+      <div id="stats-root"><div class="state">Загрузка…</div></div>
+    </section>
+
+    <!-- AI -->
+    <section class="panel" id="panel-ai">
+      <h2 class="sec">ИИ-аналитика</h2>
+      <p class="sub">Бесплатный ИИ (Cloudflare Workers AI или Google Gemini) в контексте дропшипинга анализирует магазин, подбирает лучший товар и присылает отчёт в Telegram.</p>
+
+      <!-- Авто-подбор -->
+      <div class="card" style="margin-bottom:22px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:1.1rem;margin-bottom:4px">🔮 Авто-подбор товара</h3>
+            <p class="sub" style="margin:0">ИИ выберет из каталога лучший товар, поставит наценку ×3, сделает его «ХИТом» на витрине и пришлёт отчёт в Telegram.</p>
+          </div>
+          <button class="btn btn-primary" id="pick-run" style="margin-left:auto">✨ Найти и внедрить</button>
+        </div>
+        <div id="pick-result" style="margin-top:16px"></div>
+      </div>
+
+      <!-- Анализ -->
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap">
+        <select class="input" id="ai-days" style="width:auto">
+          <option value="7">7 дней</option>
+          <option value="30" selected>30 дней</option>
+          <option value="90">90 дней</option>
+        </select>
+        <button class="btn btn-line" id="ai-run">📊 Проанализировать магазин</button>
+      </div>
+      <div id="ai-root"><div class="state">Нажмите «Проанализировать», чтобы получить разбор магазина.</div></div>
+
+      <h3 style="font-size:1.05rem;margin:26px 0 12px">История подборов</h3>
+      <div id="picks-log"><div class="state">—</div></div>
+    </section>
+
+  </div>
+</div>
+
+<script src="/assets/js/admin.js"></script>
+</body>
+</html>
