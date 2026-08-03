@@ -36,6 +36,7 @@
       <div class="tabs">
         <button class="tab active" data-tab="import">📥 Импорт</button>
         <button class="tab" data-tab="products">📦 Товары</button>
+        <button class="tab" data-tab="bundles">🎁 Наборы</button>
         <button class="tab" data-tab="stats">📊 Статистика</button>
         <button class="tab" data-tab="ai">🤖 ИИ-аналитика</button>
       </div>
@@ -86,6 +87,53 @@
           <thead><tr><th>Фото</th><th>Название</th><th>Цена</th><th>Статус</th><th></th><th></th></tr></thead>
           <tbody id="prod-body"></tbody>
         </table>
+      </div>
+    </section>
+
+    <!-- BUNDLES -->
+    <section class="panel" id="panel-bundles">
+      <h2 class="sec">Наборы-конструкторы</h2>
+      <p class="sub">Покупатель сам выбирает N товаров из набора — это поднимает средний чек и вовлечённость. Добавьте товары-варианты и задайте цену.</p>
+
+      <div class="card" style="margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          <b>🤖 Telegram-бот сборки наборов</b>
+          <div class="sub" style="margin:2px 0 0" id="tg-status">Статус: проверяю…</div>
+        </div>
+        <button class="btn btn-line" id="tg-connect" style="margin-left:auto">Подключить бота</button>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3 style="font-size:1.05rem;margin-bottom:14px" id="bnd-form-title">Новый набор</h3>
+          <div class="field"><label>Название</label><input class="input" id="bnd-title" placeholder="Набор ухода 3 в 1"></div>
+          <div class="field"><label>Описание</label><textarea class="input" id="bnd-desc" rows="2" placeholder="Собери свой комплект и получи выгоду"></textarea></div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div class="field" style="flex:1;min-width:130px"><label>Сколько выбрать (N)</label><input class="input" id="bnd-pick" type="number" value="3" min="1"></div>
+            <div class="field" style="flex:1;min-width:160px"><label>Режим цены</label>
+              <select class="input" id="bnd-mode">
+                <option value="fixed">Фиксированная за N</option>
+                <option value="sum">Сумма выбранных</option>
+                <option value="discount">Скидка % на выбранные</option>
+              </select>
+            </div>
+          </div>
+          <div class="field" id="bnd-fixed-wrap"><label>Цена набора</label><input class="input" id="bnd-fixed" type="number" value="0"></div>
+          <div class="field hidden" id="bnd-disc-wrap"><label>Скидка, %</label><input class="input" id="bnd-disc" type="number" value="15"></div>
+          <div class="field"><label>Добавить товары-варианты</label><input class="input" id="bnd-search" placeholder="Поиск по каталогу…"></div>
+          <div id="bnd-search-res"></div>
+          <div id="bnd-items" class="bnd-items"></div>
+          <label style="display:flex;gap:8px;align-items:center;margin:14px 0;font-size:.9rem"><input type="checkbox" id="bnd-active" checked> Активен (показывать на сайте)</label>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" id="bnd-save">Сохранить набор</button>
+            <button class="btn btn-line" id="bnd-reset">Очистить</button>
+          </div>
+          <div id="bnd-msg" class="msg info hidden"></div>
+        </div>
+        <div class="card">
+          <h3 style="font-size:1.05rem;margin-bottom:14px">Наборы на сайте</h3>
+          <div id="bnd-list"><div class="state">—</div></div>
+        </div>
       </div>
     </section>
 

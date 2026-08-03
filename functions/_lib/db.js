@@ -46,6 +46,13 @@ export async function ensureSchema(db) {
       id INTEGER PRIMARY KEY AUTOINCREMENT, product_id TEXT, title TEXT,
       cost REAL, retail REAL, markup REAL, reason TEXT, angle TEXT, ts INTEGER)`,
     `CREATE INDEX IF NOT EXISTS idx_picks_ts ON ai_picks(ts)`,
+    `CREATE TABLE IF NOT EXISTS bundles (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT, image TEXT,
+      pick_count INTEGER DEFAULT 3, price_mode TEXT DEFAULT 'fixed',
+      fixed_price REAL DEFAULT 0, discount REAL DEFAULT 0, currency TEXT DEFAULT 'грн',
+      items TEXT, active INTEGER DEFAULT 1, created_at INTEGER, updated_at INTEGER)`,
+    `CREATE TABLE IF NOT EXISTS tg_sessions (
+      chat_id TEXT PRIMARY KEY, state TEXT, updated_at INTEGER)`,
     `CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)`,
     `CREATE INDEX IF NOT EXISTS idx_products_available ON products(available)`,
     `CREATE INDEX IF NOT EXISTS idx_products_updated ON products(updated_at)`,
@@ -104,4 +111,33 @@ export function rowToProduct(row) {
     createdAt: row.created_at || null,
     updatedAt: row.updated_at || null,
   };
+}
+
+export function rowToBundle(row) {
+  if (!row) return null;
+  let items = [];
+  try { items = row.items ? JSON.parse(row.items) : []; } catch { items = []; }
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description || "",
+    image: row.image || (items[0] && items[0].image) || null,
+    pickCount: row.pick_count || 3,
+    priceMode: row.price_mode || "fixed",   // fixed | sum | discount
+    fixedPrice: row.fixed_price || 0,
+    discount: row.discount || 0,
+    currency: row.currency || "грн",
+    items,                                   // [{id,title,price,image}]
+    active: row.active === 1 || row.active === true,
+    createdAt: row.created_at || null,
+    updatedAt: row.updated_at || null,
+  };
+}
+
+// Авторитетная цена набора по выбранным позициям (используется на сервере и в боте).
+export function bundlePrice(bundle, chosen) {
+  const sum = (chosen || []).reduce((s, i) => s + (Number(i.price) || 0), 0);
+  if (bundle.priceMode === "fixed") return Math.round(bundle.fixedPrice || 0);
+  if (bundle.priceMode === "discount") return Math.round(sum * (1 - (bundle.discount || 0) / 100));
+  return Math.round(sum);
 }

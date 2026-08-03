@@ -195,11 +195,36 @@ function applyConfig() {
   document.querySelectorAll("[data-phone]").forEach((e) => { if (S.phone) { e.href = "tel:" + S.phone; e.textContent = S.phone; } });
 }
 
+async function loadBundles() {
+  try {
+    const r = await fetch("/api/bundles");
+    const d = await r.json();
+    if (!d.ok || !d.bundles.length) return;
+    const band = document.getElementById("bundles-band");
+    const row = document.getElementById("bundles-row");
+    row.innerHTML = d.bundles.map((b) => {
+      const rule = b.priceMode === "fixed" ? `${b.pickCount} за ${money(b.fixedPrice, b.currency)}`
+        : b.priceMode === "discount" ? `−${b.discount}% за ${b.pickCount} шт` : `выбери ${b.pickCount}`;
+      return `<a class="bundle-card" href="/bundle.html?id=${encodeURIComponent(b.id)}">
+        ${b.image ? `<img src="${esc(b.image)}" alt="">` : `<div class="ph"></div>`}
+        <div class="bc-body">
+          <h3>${esc(b.title)}</h3>
+          <p>${esc(b.description || `Выбери ${b.pickCount} из ${b.items.length}`)}</p>
+          <span class="bc-cta">🎁 ${esc(rule)} — собрать →</span>
+        </div>
+      </a>`;
+    }).join("");
+    band.hidden = false;
+  } catch (_) {}
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   applyConfig();
   updateCartCount();
   loadProducts(true);
+  loadBundles();
   track("pageview");
+  if (new URLSearchParams(location.search).get("cart") === "1") openCart();
 
   const si = document.getElementById("search-input");
   let deb;

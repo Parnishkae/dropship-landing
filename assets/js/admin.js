@@ -32,6 +32,7 @@ function switchTab(name) {
   $$(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
   $$(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + name));
   if (name === "products") loadProducts();
+  if (name === "bundles") { loadBundleList(); tgStatus(); }
   if (name === "stats") loadStats();
   if (name === "ai") loadPicks();
 }
@@ -423,6 +424,123 @@ async function loadPicks() {
   } catch (e) { el.innerHTML = `<div class="state">${esc(e.message)}</div>`; }
 }
 
+// ============ BUNDLES ============
+let bundleItems = [];
+let editingBundleId = null;
+
+function bndMode() { return $("#bnd-mode").value; }
+function bndSyncMode() {
+  $("#bnd-fixed-wrap").classList.toggle("hidden", bndMode() !== "fixed");
+  $("#bnd-disc-wrap").classList.toggle("hidden", bndMode() !== "discount");
+}
+
+async function bndSearch() {
+  const q = $("#bnd-search").value.trim();
+  const box = $("#bnd-search-res");
+  if (q.length < 2) { box.innerHTML = ""; return; }
+  const r = await fetch("/api/admin/products?limit=8&q=" + encodeURIComponent(q));
+  const d = await r.json();
+  if (!d.ok) return;
+  box.innerHTML = d.products.map((p) => `<div class="r" data-p='${esc(JSON.stringify({ id: p.id, title: p.title, price: p.price, image: p.image }))}'>
+    ${p.image ? `<img src="${esc(p.image)}">` : ""}<span style="flex:1">${esc(p.title)}</span><b>${money(p.price, p.currency)}</b></div>`).join("");
+  $$("#bnd-search-res .r").forEach((el) => el.onclick = () => { bndAddItem(JSON.parse(el.dataset.p)); $("#bnd-search").value = ""; box.innerHTML = ""; });
+}
+
+function bndAddItem(p) {
+  if (bundleItems.some((i) => i.id === p.id)) return;
+  bundleItems.push(p);
+  bndRenderItems();
+}
+function bndRenderItems() {
+  $("#bnd-items").innerHTML = bundleItems.map((i) => `<div class="bnd-item">
+    ${i.image ? `<img src="${esc(i.image)}">` : ""}<span class="t">${esc(i.title)}</span><b>${money(i.price)}</b>
+    <button class="rm" data-rm="${esc(i.id)}">✕</button></div>`).join("");
+  $$("#bnd-items [data-rm]").forEach((b) => b.onclick = () => { bundleItems = bundleItems.filter((i) => i.id !== b.dataset.rm); bndRenderItems(); });
+}
+
+function bndReset() {
+  editingBundleId = null; bundleItems = [];
+  $("#bnd-form-title").textContent = "Новый набор";
+  $("#bnd-title").value = ""; $("#bnd-desc").value = "";
+  $("#bnd-pick").value = 3; $("#bnd-mode").value = "fixed";
+  $("#bnd-fixed").value = 0; $("#bnd-disc").value = 15; $("#bnd-active").checked = true;
+  $("#bnd-items").innerHTML = ""; $("#bnd-search-res").innerHTML = "";
+  $("#bnd-msg").className = "msg info hidden"; bndSyncMode();
+}
+
+async function bndSave() {
+  const msg = $("#bnd-msg");
+  const payload = {
+    id: editingBundleId || undefined,
+    title: $("#bnd-title").value.trim(),
+    description: $("#bnd-desc").value.trim(),
+    pickCount: parseInt($("#bnd-pick").value, 10) || 3,
+    priceMode: bndMode(),
+    fixedPrice: Number($("#bnd-fixed").value) || 0,
+    discount: Number($("#bnd-disc").value) || 0,
+    active: $("#bnd-active").checked,
+    items: bundleItems,
+  };
+  const r = await fetch("/api/admin/bundles", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+  const d = await r.json();
+  if (d.ok) { msg.className = "msg ok"; msg.textContent = "Набор сохранён"; bndReset(); loadBundleList(); }
+  else { msg.className = "msg err"; msg.textContent = d.error || "Ошибка"; }
+}
+
+async function loadBundleList() {
+  const el = $("#bnd-list");
+  try {
+    const r = await fetch("/api/admin/bundles");
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error);
+    if (!d.bundles.length) { el.innerHTML = `<div class="state">Наборов пока нет</div>`; return; }
+    el.innerHTML = d.bundles.map((b) => `<div class="bnd-row" data-id="${esc(b.id)}">
+      ${b.image ? `<img src="${esc(b.image)}" style="width:44px;height:44px;border-radius:8px;object-fit:cover">` : ""}
+      <div class="t"><b>${esc(b.title)}</b><br><small>${b.pickCount} из ${b.items.length} · ${b.priceMode === "fixed" ? money(b.fixedPrice, b.currency) : b.priceMode === "discount" ? "−" + b.discount + "%" : "сумма"} ${b.active ? "" : "· <span style=color:var(--muted)>скрыт</span>"}</small></div>
+      <button class="btn btn-line btn-sm" data-edit>✎</button>
+      <button class="btn btn-danger btn-sm" data-del>✕</button>
+    </div>`).join("");
+    $$("#bnd-list .bnd-row").forEach((row) => {
+      const b = d.bundles.find((x) => x.id === row.dataset.id);
+      $("[data-edit]", row).onclick = () => bndEdit(b);
+      $("[data-del]", row).onclick = async () => { if (!confirm("Удалить набор?")) return; await fetch("/api/admin/bundles?id=" + encodeURIComponent(b.id), { method: "DELETE" }); loadBundleList(); };
+    });
+  } catch (e) { el.innerHTML = `<div class="state">${esc(e.message)}</div>`; }
+}
+
+function bndEdit(b) {
+  editingBundleId = b.id; bundleItems = b.items.slice();
+  $("#bnd-form-title").textContent = "Редактирование: " + b.title;
+  $("#bnd-title").value = b.title; $("#bnd-desc").value = b.description || "";
+  $("#bnd-pick").value = b.pickCount; $("#bnd-mode").value = b.priceMode;
+  $("#bnd-fixed").value = b.fixedPrice; $("#bnd-disc").value = b.discount; $("#bnd-active").checked = b.active;
+  bndSyncMode(); bndRenderItems();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ============ TELEGRAM BOT ============
+async function tgStatus() {
+  const el = $("#tg-status");
+  try {
+    const r = await fetch("/api/admin/tg-setup");
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error);
+    el.innerHTML = d.configured
+      ? `Статус: <span style="color:#86efac">✅ подключён</span>`
+      : `Статус: не подключён. Задайте BOT_TOKEN и нажмите «Подключить бота».`;
+  } catch (e) { el.textContent = "Статус: " + e.message; }
+}
+async function tgConnect() {
+  const btn = $("#tg-connect"); btn.disabled = true; btn.textContent = "Подключаю…";
+  try {
+    const r = await fetch("/api/admin/tg-setup", { method: "POST" });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error);
+    $("#tg-status").innerHTML = `Статус: <span style="color:#86efac">✅ ${esc(d.result)}</span>`;
+  } catch (e) { $("#tg-status").innerHTML = `<span style="color:#fca5a5">${esc(e.message)}</span>`; }
+  btn.disabled = false; btn.textContent = "Подключить бота";
+}
+
 // ============ INIT ============
 document.addEventListener("DOMContentLoaded", async () => {
   $("#login-form").addEventListener("submit", doLogin);
@@ -441,6 +559,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#prod-search").addEventListener("input", () => { clearTimeout(window._ps); window._ps = setTimeout(loadProducts, 350); });
   $("#prod-clear").addEventListener("click", clearAll);
   $("#prod-refresh").addEventListener("click", loadProducts);
+
+  // bundles
+  $("#bnd-mode").addEventListener("change", bndSyncMode);
+  $("#bnd-search").addEventListener("input", () => { clearTimeout(window._bs); window._bs = setTimeout(bndSearch, 300); });
+  $("#bnd-save").addEventListener("click", bndSave);
+  $("#bnd-reset").addEventListener("click", bndReset);
+  $("#tg-connect").addEventListener("click", tgConnect);
 
   // stats & ai
   $("#stats-days").addEventListener("change", loadStats);

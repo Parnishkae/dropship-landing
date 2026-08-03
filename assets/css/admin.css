@@ -110,4 +110,19 @@ h2.sec { font-size: 1.35rem; margin-bottom: 4px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .state { text-align: center; padding: 50px 0; color: var(--muted); }
 
+/* Bundles admin */
+.bnd-items { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.bnd-item { display: flex; align-items: center; gap: 10px; background: var(--surface2); border-radius: 8px; padding: 6px 10px; font-size: .88rem; }
+.bnd-item img { width: 34px; height: 34px; border-radius: 6px; object-fit: cover; background: var(--bg); }
+.bnd-item .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bnd-item .rm { border: none; background: transparent; color: var(--bad); cursor: pointer; font-size: 1rem; }
+#bnd-search-res { display: grid; gap: 4px; margin: 6px 0; }
+#bnd-search-res .r { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; font-size: .86rem; }
+#bnd-search-res .r:hover { border-color: var(--accent); }
+#bnd-search-res img { width: 30px; height: 30px; border-radius: 6px; object-fit: cover; background: var(--surface2); }
+.bnd-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.bnd-row:last-child { border-bottom: none; }
+.bnd-row .t { flex: 1; min-width: 0; }
+.bnd-row small { color: var(--muted); }
+
 @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } .main { padding: 18px 14px 50px; } }

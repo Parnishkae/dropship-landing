@@ -77,3 +77,27 @@ CREATE TABLE IF NOT EXISTS ai_picks (
   ts         INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_picks_ts ON ai_picks(ts);
+
+-- Наборы-конструкторы (выбери N из M)
+CREATE TABLE IF NOT EXISTS bundles (
+  id          TEXT PRIMARY KEY,
+  title       TEXT NOT NULL,
+  description TEXT,
+  image       TEXT,
+  pick_count  INTEGER DEFAULT 3,   -- сколько позиций выбрать
+  price_mode  TEXT DEFAULT 'fixed',-- fixed | sum | discount
+  fixed_price REAL DEFAULT 0,
+  discount    REAL DEFAULT 0,      -- % скидки для режима discount
+  currency    TEXT DEFAULT 'грн',
+  items       TEXT,                -- JSON: [{id,title,price,image}]
+  active      INTEGER DEFAULT 1,
+  created_at  INTEGER,
+  updated_at  INTEGER
+);
+
+-- Состояния диалогов Telegram-бота
+CREATE TABLE IF NOT EXISTS tg_sessions (
+  chat_id    TEXT PRIMARY KEY,
+  state      TEXT,
+  updated_at INTEGER
+);
