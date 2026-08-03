@@ -10,10 +10,21 @@ binding = "DB"
 database_name = "dropship-db"
 database_id = "REPLACE_WITH_YOUR_DATABASE_ID"
 
+# ── Cloudflare Workers AI (бесплатный ИИ прямо на хостинге) ──
+# Даёт binding env.AI. Модель по умолчанию — Llama 3.3 70B.
+# В дашборде Pages: Settings → Functions → AI bindings → добавить binding "AI".
+[ai]
+binding = "AI"
+
 # ── Переменные окружения / секреты (задаются в дашборде Cloudflare Pages
 #    или через `npx wrangler pages secret put <NAME>`) ──
 #   BOT_TOKEN        — токен Telegram-бота
-#   CHAT_ID          — id чата/канала, куда падают заявки
+#   CHAT_ID          — id чата/канала, куда падают заявки и отчёты ИИ
 #   ADMIN_PASSWORD   — пароль для входа в админку (/admin.html)
 #   AUTH_SECRET      — случайная строка для подписи сессии (любые 32+ символов)
-#   ANTHROPIC_API_KEY — (опционально) ключ Claude API для ИИ-аналитики
+#   CRON_SECRET      — секрет для авто-запуска подбора товара по расписанию
+#   MARKUP           — (необязательно) наценка, по умолчанию 3 (×3)
+#   GEMINI_API_KEY   — (необязательно) бесплатный ключ Google Gemini — если задан,
+#                      ИИ использует Gemini вместо Workers AI (чуть аналитичнее)
+#   AI_MODEL         — (необязательно) переопределить модель Workers AI
+#   GEMINI_MODEL     — (необязательно) модель Gemini, по умолчанию gemini-2.0-flash

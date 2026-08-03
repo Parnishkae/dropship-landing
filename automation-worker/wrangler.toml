@@ -1,0 +1,16 @@
+# Отдельный Cloudflare Worker — запускает авто-подбор товара по расписанию.
+# Pages Functions не умеют cron, поэтому расписание живёт здесь.
+# Деплой:  cd automation-worker && npx wrangler deploy
+# Секрет:  npx wrangler secret put CRON_SECRET   (то же значение, что и на сайте)
+
+name = "dropship-automation"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+[triggers]
+# каждый день в 09:00 UTC (поменяйте под себя; формат cron)
+crons = ["0 9 * * *"]
+
+[vars]
+# адрес вашего сайта на Pages (без слэша в конце)
+SITE_URL = "https://ВАШ-САЙТ.pages.dev"

@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS products (
   params      TEXT,            -- JSON доп. характеристик (размер, цвет и т.д.)
   url         TEXT,            -- ссылка на товар у поставщика
   source      TEXT,            -- имя импортированного фида
+  cost        REAL,            -- закупочная цена (база для наценки)
+  featured    INTEGER DEFAULT 0, -- «ХИТ» / выбран ИИ
   created_at  INTEGER,
   updated_at  INTEGER
 );
@@ -61,3 +63,17 @@ CREATE TABLE IF NOT EXISTS settings (
   key   TEXT PRIMARY KEY,
   value TEXT
 );
+
+-- Лог авто-подбора товаров ИИ
+CREATE TABLE IF NOT EXISTS ai_picks (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id TEXT,
+  title      TEXT,
+  cost       REAL,
+  retail     REAL,
+  markup     REAL,
+  reason     TEXT,
+  angle      TEXT,
+  ts         INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_picks_ts ON ai_picks(ts);

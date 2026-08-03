@@ -66,6 +66,7 @@ button { font-family: inherit; cursor: pointer; }
 .card-img .ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #c4c8cf; font-size: .8rem; }
 .badge { position: absolute; top: 10px; left: 10px; background: var(--accent); color: #fff; font-size: .7rem; font-weight: 800; padding: 4px 9px; border-radius: 999px; }
 .badge.out { background: #9ca3af; }
+.badge.hit { background: #111827; }
 .card-body { padding: 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .card-cat { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
 .card-title { font-weight: 600; font-size: .96rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

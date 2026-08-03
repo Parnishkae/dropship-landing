@@ -40,7 +40,12 @@ export async function ensureSchema(db) {
       price REAL DEFAULT 0, old_price REAL, currency TEXT DEFAULT 'UAH',
       category TEXT, vendor TEXT, image TEXT, images TEXT,
       available INTEGER DEFAULT 1, params TEXT, url TEXT, source TEXT,
+      cost REAL, featured INTEGER DEFAULT 0,
       created_at INTEGER, updated_at INTEGER)`,
+    `CREATE TABLE IF NOT EXISTS ai_picks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT, product_id TEXT, title TEXT,
+      cost REAL, retail REAL, markup REAL, reason TEXT, angle TEXT, ts INTEGER)`,
+    `CREATE INDEX IF NOT EXISTS idx_picks_ts ON ai_picks(ts)`,
     `CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)`,
     `CREATE INDEX IF NOT EXISTS idx_products_available ON products(available)`,
     `CREATE INDEX IF NOT EXISTS idx_products_updated ON products(updated_at)`,
@@ -60,6 +65,13 @@ export async function ensureSchema(db) {
   ];
   for (const sql of statements) {
     await db.prepare(sql).run();
+  }
+  // Догоняющие миграции для уже созданных баз (безопасно игнорируем "duplicate column").
+  for (const sql of [
+    "ALTER TABLE products ADD COLUMN cost REAL",
+    "ALTER TABLE products ADD COLUMN featured INTEGER DEFAULT 0",
+  ]) {
+    try { await db.prepare(sql).run(); } catch (_) { /* колонка уже есть */ }
   }
   schemaReady = true;
 }
@@ -84,6 +96,8 @@ export function rowToProduct(row) {
     image: row.image || (images[0] || null),
     images: images.length ? images : (row.image ? [row.image] : []),
     available: row.available === 1 || row.available === true,
+    featured: row.featured === 1 || row.featured === true,
+    cost: row.cost != null ? row.cost : null,
     params,
     url: row.url || null,
     source: row.source || null,

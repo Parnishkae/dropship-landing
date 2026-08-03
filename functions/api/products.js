@@ -24,11 +24,11 @@ export async function onRequestGet({ request, env }) {
 
     const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
     const orderSql = {
-      new: "updated_at DESC",
+      new: "featured DESC, updated_at DESC",
       price_asc: "price ASC",
       price_desc: "price DESC",
       title: "title ASC",
-    }[sort] || "updated_at DESC";
+    }[sort] || "featured DESC, updated_at DESC";
 
     const countRow = await db
       .prepare(`SELECT COUNT(*) AS c FROM products ${whereSql}`)

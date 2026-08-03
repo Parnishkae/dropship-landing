@@ -33,7 +33,7 @@ function switchTab(name) {
   $$(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + name));
   if (name === "products") loadProducts();
   if (name === "stats") loadStats();
-  if (name === "ai") { /* по кнопке */ }
+  if (name === "ai") loadPicks();
 }
 
 // ============ XML PARSER (в браузере) ============
@@ -377,6 +377,52 @@ function renderAI(d) {
     <div class="ai-recs">${recs}</div>`;
 }
 
+// ---- Авто-подбор товара ----
+async function runAutoPick() {
+  const btn = $("#pick-run"); btn.disabled = true; btn.textContent = "ИИ подбирает…";
+  const box = $("#pick-result");
+  box.innerHTML = `<div class="state"><span class="spinner"></span><p style="margin-top:10px">ИИ анализирует каталог и выбирает лучший товар…</p></div>`;
+  try {
+    const r = await fetch("/api/admin/auto-pick", { method: "POST" });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error);
+    const p = d.pick;
+    box.innerHTML = `
+      <div class="msg ${d.telegramSent ? "ok" : "info"}">${d.telegramSent ? "✅ Готово! Отчёт отправлен в Telegram." : "✅ Готово! (Telegram не настроен — отчёт не отправлен)"}</div>
+      <div class="ai-rec" style="margin-top:12px">
+        <b>🔥 ${esc(p.title)}</b><br>
+        Закупка ${p.cost} → на сайте <b>${money(p.price, p.currency)}</b> · наценка ×${p.markup} · прибыль ${p.profit}<br>
+        <span style="color:var(--muted)">${esc(p.reason || "")}</span><br>
+        ${p.angle ? `🎯 ${esc(p.angle)}<br>` : ""}
+        ${p.tgPost ? `<div style="margin-top:8px;padding:10px;background:var(--surface2);border-radius:8px;white-space:pre-wrap">${esc(p.tgPost)}</div>` : ""}
+        <a href="${esc(p.link || "/product.html?id=" + encodeURIComponent(p.id))}" target="_blank">Открыть товар ↗</a>
+      </div>`;
+    loadPicks();
+  } catch (e) {
+    box.innerHTML = `<div class="msg err">Ошибка: ${esc(e.message)}</div>`;
+  }
+  btn.disabled = false; btn.textContent = "✨ Найти и внедрить";
+}
+
+async function loadPicks() {
+  const el = $("#picks-log");
+  try {
+    const r = await fetch("/api/admin/auto-pick");
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error);
+    if (!d.picks.length) { el.innerHTML = `<div class="state">Пока не было авто-подборов</div>`; return; }
+    el.innerHTML = `<div class="card" style="padding:0;overflow-x:auto"><table class="tbl">
+      <thead><tr><th>Дата</th><th>Товар</th><th>Закупка</th><th>Цена</th><th>Причина</th></tr></thead>
+      <tbody>${d.picks.map((p) => `<tr>
+        <td style="white-space:nowrap">${new Date(p.ts).toLocaleDateString("ru-RU")}</td>
+        <td>${esc(p.title)}</td>
+        <td>${Math.round(p.cost)}</td>
+        <td style="font-weight:700">${Math.round(p.retail)} <small style="color:var(--muted)">×${p.markup}</small></td>
+        <td><small style="color:var(--muted)">${esc(p.reason || "")}</small></td>
+      </tr>`).join("")}</tbody></table></div>`;
+  } catch (e) { el.innerHTML = `<div class="state">${esc(e.message)}</div>`; }
+}
+
 // ============ INIT ============
 document.addEventListener("DOMContentLoaded", async () => {
   $("#login-form").addEventListener("submit", doLogin);
@@ -399,7 +445,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // stats & ai
   $("#stats-days").addEventListener("change", loadStats);
   $("#ai-run").addEventListener("click", loadAI);
-  $("#ai-days").addEventListener("change", () => {});
+  $("#pick-run").addEventListener("click", runAutoPick);
 
   if (await checkAuth()) showApp(); else showLogin();
 });

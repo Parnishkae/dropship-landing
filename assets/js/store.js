@@ -81,7 +81,9 @@ function cardHTML(p) {
     ? `<img loading="lazy" src="${esc(p.image)}" alt="${esc(p.title)}" onerror="this.parentNode.innerHTML='<div class=&quot;ph&quot;>нет фото</div>'">`
     : `<div class="ph">нет фото</div>`;
   const disc = p.oldPrice && p.oldPrice > p.price ? `<span class="old">${money(p.oldPrice, p.currency)}</span>` : "";
-  const badge = !p.available ? `<span class="badge out">нет в наличии</span>` : (disc ? `<span class="badge">-скидка</span>` : "");
+  const badge = !p.available
+    ? `<span class="badge out">нет в наличии</span>`
+    : (p.featured ? `<span class="badge hit">🔥 ХИТ</span>` : (disc ? `<span class="badge">-скидка</span>` : ""));
   const payload = esc(JSON.stringify({ id: p.id, title: p.title, price: p.price, currency: p.currency, image: p.image }));
   const addBtn = p.available
     ? `<button class="add-btn" data-add="${payload}" title="В корзину"><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg></button>`

@@ -106,16 +106,33 @@
     <!-- AI -->
     <section class="panel" id="panel-ai">
       <h2 class="sec">ИИ-аналитика</h2>
-      <p class="sub">Claude анализирует данные магазина и даёт конкретные рекомендации: что улучшить в каталоге, ценах, фото и продвижении. Если ключ Claude не задан — используется встроенный базовый анализ.</p>
+      <p class="sub">Бесплатный ИИ (Cloudflare Workers AI или Google Gemini) в контексте дропшипинга анализирует магазин, подбирает лучший товар и присылает отчёт в Telegram.</p>
+
+      <!-- Авто-подбор -->
+      <div class="card" style="margin-bottom:22px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:1.1rem;margin-bottom:4px">🔮 Авто-подбор товара</h3>
+            <p class="sub" style="margin:0">ИИ выберет из каталога лучший товар, поставит наценку ×3, сделает его «ХИТом» на витрине и пришлёт отчёт в Telegram.</p>
+          </div>
+          <button class="btn btn-primary" id="pick-run" style="margin-left:auto">✨ Найти и внедрить</button>
+        </div>
+        <div id="pick-result" style="margin-top:16px"></div>
+      </div>
+
+      <!-- Анализ -->
       <div style="display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap">
         <select class="input" id="ai-days" style="width:auto">
           <option value="7">7 дней</option>
           <option value="30" selected>30 дней</option>
           <option value="90">90 дней</option>
         </select>
-        <button class="btn btn-primary" id="ai-run">🤖 Проанализировать</button>
+        <button class="btn btn-line" id="ai-run">📊 Проанализировать магазин</button>
       </div>
       <div id="ai-root"><div class="state">Нажмите «Проанализировать», чтобы получить разбор магазина.</div></div>
+
+      <h3 style="font-size:1.05rem;margin:26px 0 12px">История подборов</h3>
+      <div id="picks-log"><div class="state">—</div></div>
     </section>
 
   </div>

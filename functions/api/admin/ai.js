@@ -1,6 +1,7 @@
-// GET /api/admin/ai?days=30 — ИИ-аналитика магазина (Claude API), с эвристическим запасным вариантом.
+// GET /api/admin/ai?days=30 — ИИ-аналитика магазина (бесплатный ИИ), с эвристическим запасным вариантом.
 import { getDB, ensureSchema, json, errorResponse } from "../../_lib/db.js";
 import { requireAuth } from "../../_lib/auth.js";
+import { aiComplete, aiProvider, extractJSON, DROPSHIP_SYSTEM } from "../../_lib/ai.js";
 
 async function gatherSummary(db, days) {
   const since = Date.now() - days * 86400000;
@@ -66,36 +67,20 @@ function heuristic(s) {
   };
 }
 
-async function askClaude(env, s) {
-  const model = env.AI_MODEL || "claude-opus-5";
-  const prompt =
-`Ты — аналитик дропшип-магазина. На основе метрик за ${s.days} дней дай краткий разбор на русском языке для владельца (не технический).
-Метрики (JSON):
+async function askAI(env, s) {
+  const user =
+`Проанализируй мой дропшип-магазин за ${s.days} дней и дай разбор для владельца (не технаря).
+Данные магазина (JSON):
 ${JSON.stringify(s, null, 2)}
 
-Верни СТРОГО JSON без markdown-обёртки, по схеме:
+Верни СТРОГО валидный JSON без markdown по схеме:
 {"headline": "одно предложение с ключевым итогом за период",
- "metrics": {"Метрика": "значение", ...},   // 3-4 важные метрики словами
- "recommendations": ["конкретный совет 1", "совет 2", ...]}  // 4-6 практичных советов: что улучшить в каталоге, ценах, фото, категориях, продвижении в Telegram и конверсии.`;
+ "metrics": {"Название метрики": "значение", ...},
+ "recommendations": ["конкретный совет 1", "совет 2", ...]}
+В recommendations дай 4-6 практичных советов именно по дропшипингу: какие товары/категории продвигать, что не так с ценами и наценкой, фото и карточками, как поднять конверсию и что постить в Telegram.`;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": env.ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: 1500,
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-  if (!res.ok) throw new Error("AI upstream " + res.status);
-  const data = await res.json();
-  const text = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("").trim();
-  const jsonText = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-  return JSON.parse(jsonText);
+  const text = await aiComplete(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 1200 });
+  return extractJSON(text);
 }
 
 export async function onRequestGet({ request, env }) {
@@ -109,15 +94,15 @@ export async function onRequestGet({ request, env }) {
     const summary = await gatherSummary(db, days);
 
     let analysis, source;
-    if (env.ANTHROPIC_API_KEY) {
-      try { analysis = await askClaude(env, summary); source = "ai"; }
+    if (aiProvider(env)) {
+      try { analysis = await askAI(env, summary); source = "ai"; }
       catch (_) { analysis = heuristic(summary); source = "heuristic-fallback"; }
     } else {
       analysis = heuristic(summary);
       source = "heuristic";
     }
 
-    return json({ ok: true, source, summary, analysis });
+    return json({ ok: true, source, provider: aiProvider(env), summary, analysis });
   } catch (err) {
     return errorResponse(err);
   }
