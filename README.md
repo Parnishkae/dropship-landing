@@ -27,8 +27,9 @@ assets/css, assets/js статика (в т.ч. config.js — контакты �
 functions/api/…       API (Pages Functions)
 functions/_lib/…      общие модули (БД, авторизация)
 schema.sql            схема базы данных
-wrangler.toml         конфиг Cloudflare
 ```
+
+> Бинды (D1, AI) и секреты настраиваются в дашборде Cloudflare Pages, а не в файле конфига.
 
 ## Настройка (пошагово)
 
@@ -41,7 +42,7 @@ npx wrangler d1 create dropship-db
 npx wrangler d1 execute dropship-db --remote --file=./schema.sql
 ```
 
-> Базу привязываем к сайту в дашборде (шаг 3), а не в `wrangler.toml` — иначе деплой падает.
+> Базу привязываем к сайту в дашборде (шаг 3).
 
 ### 2. Задать секреты
 В дашборде Cloudflare Pages → ваш проект → **Settings → Environment variables** (или через CLI `npx wrangler pages secret put <ИМЯ>`):
@@ -60,7 +61,7 @@ npx wrangler d1 execute dropship-db --remote --file=./schema.sql
 > **Как узнать CHAT_ID:** напишите боту, затем откройте `https://api.telegram.org/bot<BOT_TOKEN>/getUpdates` — id чата будет в ответе.
 
 ### 3. Привязать D1 и Workers AI к Pages
-В дашборде проекта: **Settings → Functions** (бинды задаются здесь, не в `wrangler.toml`):
+В дашборде проекта: **Settings → Bindings** (или **Settings → Functions**):
 - **D1 database bindings** → добавьте binding `DB` → `dropship-db`
 - **AI bindings** → добавьте binding `AI` (это включает бесплатный Cloudflare Workers AI)
 
