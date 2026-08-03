@@ -1,0 +1,19 @@
+name = "dropship-store"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "."
+
+# ── Cloudflare D1 (база данных товаров, заказов, статистики) ──
+# Создай базу:  npx wrangler d1 create dropship-db
+# Затем вставь сюда database_id из вывода команды.
+[[d1_databases]]
+binding = "DB"
+database_name = "dropship-db"
+database_id = "REPLACE_WITH_YOUR_DATABASE_ID"
+
+# ── Переменные окружения / секреты (задаются в дашборде Cloudflare Pages
+#    или через `npx wrangler pages secret put <NAME>`) ──
+#   BOT_TOKEN        — токен Telegram-бота
+#   CHAT_ID          — id чата/канала, куда падают заявки
+#   ADMIN_PASSWORD   — пароль для входа в админку (/admin.html)
+#   AUTH_SECRET      — случайная строка для подписи сессии (любые 32+ символов)
+#   ANTHROPIC_API_KEY — (опционально) ключ Claude API для ИИ-аналитики

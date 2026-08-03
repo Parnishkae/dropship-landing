@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Товар — магазин</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/store.css">
+</head>
+<body>
+
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <a href="/" class="logo"><span class="dot"></span><span data-site-name>SHOP</span></a>
+    <div class="hdr-actions" style="margin-left:auto">
+      <a class="icon-btn" href="/">← В каталог</a>
+      <a class="icon-btn" data-tg href="#" target="_blank" rel="noopener">Telegram</a>
+      <a class="icon-btn" href="/">Корзина <span class="cart-count">0</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="pd-root">
+  <div class="state"><h3>Загрузка…</h3></div>
+</main>
+
+<footer>
+  <div class="wrap foot-in">
+    <a href="/" class="logo"><span class="dot"></span><span data-site-name>SHOP</span></a>
+    <span class="muted">© <span id="year"></span></span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/product.js"></script>
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
