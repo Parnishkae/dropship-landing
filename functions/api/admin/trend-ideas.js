@@ -6,7 +6,7 @@
 //   2) Google Trends (живые запросы по стране) — как доп. сигнал, без ключа.
 import { json, errorResponse, HttpError } from "../../_lib/db.js";
 import { requireAuth } from "../../_lib/auth.js";
-import { aiProvider, geminiGrounded, geminiComplete, workersAiComplete, extractJSON, DROPSHIP_SYSTEM } from "../../_lib/ai.js";
+import { aiProvider, geminiGrounded, geminiComplete, groqComplete, workersAiComplete, extractJSON, DROPSHIP_SYSTEM } from "../../_lib/ai.js";
 
 function esc(s) { return String(s == null ? "" : s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c])); }
 
@@ -77,34 +77,32 @@ export async function onRequestPost({ request, env }) {
     const terms = await fetchGoogleTrends(geo);
     const user = buildPrompt(niche, geo, terms, markup);
 
-    let parsed, sources = [], mode, warn = "";
-    const runWorkers = async () => {
-      const text = await workersAiComplete(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 1500 });
-      return { parsed: parseIdeas(text), mode: "workers-ai" };
-    };
+    // Цепочка попыток: реальный веб-поиск → быстрые модели → Workers AI.
+    const attempts = [];
+    if (env.GEMINI_API_KEY) attempts.push({ id: "gemini-search", run: async () => {
+      const { text, sources: srcs } = await geminiGrounded(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 2200 });
+      return { text, sources: srcs, mode: "gemini-search" };
+    }});
+    if (env.GROQ_API_KEY) attempts.push({ id: "groq", run: async () => ({ text: await groqComplete(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 1500 }), mode: "groq" }) });
+    if (env.GEMINI_API_KEY) attempts.push({ id: "gemini", run: async () => ({ text: await geminiComplete(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 1500 }), mode: "gemini" }) });
+    if (env.AI) attempts.push({ id: "workers-ai", run: async () => ({ text: await workersAiComplete(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 1500 }), mode: "workers-ai" }) });
 
-    if (env.GEMINI_API_KEY) {
+    let parsed, sources = [], mode, warn = "";
+    for (const a of attempts) {
       try {
-        // 1) Настоящий поиск в интернете
-        const { text, sources: srcs } = await geminiGrounded(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 2200 });
-        parsed = parseIdeas(text); sources = srcs; mode = "gemini-search";
-      } catch (e1) {
-        warn = e1.status === 429
-          ? "Gemini-поиск упёрся в лимит бесплатного тарифа — идеи собраны без веб-поиска (попробуйте позже)."
-          : "Gemini-поиск сейчас недоступен — идеи собраны без веб-поиска.";
-        try {
-          // 2) Обычный Gemini (без поиска, но со свежими Google Trends в контексте)
-          const text = await geminiComplete(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 1500 });
-          parsed = parseIdeas(text); mode = "gemini";
-        } catch (e2) {
-          // 3) Workers AI
-          if (env.AI) { const r = await runWorkers(); parsed = r.parsed; mode = r.mode; }
-          else throw e1;
+        const r = await a.run();
+        parsed = parseIdeas(r.text); sources = r.sources || []; mode = r.mode;
+        break;
+      } catch (e) {
+        if (a.id === "gemini-search") {
+          warn = e.status === 429
+            ? "Gemini-поиск упёрся в лимит бесплатного тарифа — идеи собраны без веб-поиска (попробуйте позже)."
+            : "Gemini-поиск сейчас недоступен — идеи собраны без веб-поиска.";
         }
+        // иначе пробуем следующий провайдер
       }
-    } else {
-      const r = await runWorkers(); parsed = r.parsed; mode = r.mode;
     }
+    if (!parsed) throw new HttpError(503, "ИИ сейчас недоступен, попробуйте позже.");
 
     let telegramSent = false;
     if (notify && parsed.ideas.length) {
