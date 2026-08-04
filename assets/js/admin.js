@@ -424,6 +424,39 @@ async function loadPicks() {
   } catch (e) { el.innerHTML = `<div class="state">${esc(e.message)}</div>`; }
 }
 
+// ---- Идеи из трендов (наружу) ----
+async function runTrendIdeas() {
+  const btn = $("#trend-run"); btn.disabled = true; btn.textContent = "ИИ ищет…";
+  const box = $("#trend-result"); const modeEl = $("#trend-mode");
+  modeEl.textContent = "";
+  box.innerHTML = `<div class="state"><span class="spinner"></span><p style="margin-top:10px">ИИ анализирует тренды и подбирает идеи…</p></div>`;
+  try {
+    const r = await fetch("/api/admin/trend-ideas", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ niche: $("#trend-niche").value.trim(), geo: $("#trend-geo").value, notify: true }),
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error);
+    modeEl.innerHTML = (d.grounded
+      ? "🔎 Реальный поиск в интернете (Gemini)"
+      : "⚡ На основе модели + Google Trends. Для настоящего поиска в интернете добавь бесплатный <b>GEMINI_API_KEY</b>.")
+      + (d.telegramSent ? " · ✅ отправлено в Telegram" : "");
+    if (!d.ideas.length) {
+      box.innerHTML = `<div class="msg info">ИИ не вернул структурированные идеи.${d.raw ? "<br><br>" + esc(d.raw) : ""}</div>`;
+    } else {
+      box.innerHTML = d.ideas.map((i) => `<div class="ai-rec">
+        <b>${esc(i.name || "")}</b><br>
+        <span style="color:var(--muted)">${esc(i.why || "")}</span><br>
+        💵 закуп ~${esc(i.buy)} → розница <b>${esc(i.sell)}</b> · 🎯 ${esc(i.angle || "")}<br>
+        👥 ${esc(i.audience || "")} · 🛒 ${esc(i.supplier || "")}
+      </div>`).join("")
+      + (d.sources && d.sources.length ? `<div class="sub" style="margin-top:10px">Источники: ${d.sources.slice(0, 4).map((s) => `<a href="${esc(s.uri)}" target="_blank" style="color:var(--accent)">${esc(s.title || "ссылка")}</a>`).join(" · ")}</div>` : "")
+      + (d.trends && d.trends.length ? `<div class="sub" style="margin-top:6px">🔥 Сейчас в трендах (${esc(d.geo)}): ${d.trends.slice(0, 8).map(esc).join(", ")}</div>` : "");
+    }
+  } catch (e) { box.innerHTML = `<div class="msg err">Ошибка: ${esc(e.message)}</div>`; }
+  btn.disabled = false; btn.textContent = "🔎 Предложить идеи";
+}
+
 // ============ BUNDLES ============
 let bundleItems = [];
 let editingBundleId = null;
@@ -571,6 +604,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#stats-days").addEventListener("change", loadStats);
   $("#ai-run").addEventListener("click", loadAI);
   $("#pick-run").addEventListener("click", runAutoPick);
+  $("#trend-run").addEventListener("click", runTrendIdeas);
 
   if (await checkAuth()) showApp(); else showLogin();
 });

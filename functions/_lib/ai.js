@@ -37,6 +37,31 @@ async function geminiComplete(env, { system, user, maxTokens }) {
   return text;
 }
 
+// Gemini с реальным поиском в интернете (Google Search grounding).
+// Возвращает { text, sources }. Требует GEMINI_API_KEY.
+export async function geminiGrounded(env, { system, user, maxTokens = 2000 }) {
+  if (!env.GEMINI_API_KEY) throw new HttpError(503, "Нужен GEMINI_API_KEY для поиска в интернете.");
+  const model = env.GEMINI_MODEL || "gemini-2.0-flash";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: system }] },
+      contents: [{ role: "user", parts: [{ text: user }] }],
+      tools: [{ google_search: {} }],
+      generationConfig: { maxOutputTokens: maxTokens, temperature: 0.8 },
+    }),
+  });
+  if (!res.ok) throw new HttpError(502, "Gemini: " + res.status);
+  const data = await res.json();
+  const cand = data.candidates?.[0];
+  const text = (cand?.content?.parts || []).map((p) => p.text || "").join("");
+  const chunks = cand?.groundingMetadata?.groundingChunks || [];
+  const sources = chunks.map((c) => ({ title: c.web?.title || "", uri: c.web?.uri || "" })).filter((s) => s.uri);
+  return { text, sources };
+}
+
 async function workersAiComplete(env, { system, user, maxTokens }) {
   const model = env.AI_MODEL || "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
   const out = await env.AI.run(model, {
