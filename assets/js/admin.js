@@ -439,6 +439,7 @@ async function runTrendIdeas() {
     if (!d.ok) throw new Error(d.error);
     let label;
     if (d.grounded) label = "🔎 Реальный поиск в интернете (Gemini)";
+    else if (d.mode === "groq") label = "⚡ Groq (Llama 3.3) + Google Trends";
     else if (d.mode === "gemini") label = "🧠 Gemini + Google Trends (без веб-поиска)";
     else label = "⚡ На основе модели + Google Trends. Для веб-поиска добавь бесплатный <b>GEMINI_API_KEY</b>.";
     modeEl.innerHTML = label

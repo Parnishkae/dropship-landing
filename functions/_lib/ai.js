@@ -1,9 +1,10 @@
 // Единый интерфейс к бесплатному ИИ.
-// Приоритет: Google Gemini (если задан GEMINI_API_KEY) → Cloudflare Workers AI (binding AI).
-// Оба — с бесплатным тарифом. Claude не используется.
+// Приоритет: Groq (GROQ_API_KEY) → Google Gemini (GEMINI_API_KEY) → Cloudflare Workers AI (binding AI).
+// Все три — с бесплатным тарифом. Claude не используется.
 import { HttpError } from "./db.js";
 
 export function aiProvider(env) {
+  if (env.GROQ_API_KEY) return "groq";
   if (env.GEMINI_API_KEY) return "gemini";
   if (env.AI) return "workers-ai";
   return null;
@@ -12,10 +13,32 @@ export function aiProvider(env) {
 export async function aiComplete(env, { system, user, maxTokens = 1200 }) {
   const provider = aiProvider(env);
   if (!provider) {
-    throw new HttpError(503, "ИИ не подключён. Включите Workers AI (binding AI) или задайте GEMINI_API_KEY.");
+    throw new HttpError(503, "ИИ не подключён. Включите Workers AI (binding AI) или задайте GROQ_API_KEY / GEMINI_API_KEY.");
   }
+  if (provider === "groq") return groqComplete(env, { system, user, maxTokens });
   if (provider === "gemini") return geminiComplete(env, { system, user, maxTokens });
   return workersAiComplete(env, { system, user, maxTokens });
+}
+
+// Groq — быстрый бесплатный инференс open-моделей (Llama 3.3 70B и др.), OpenAI-совместимый API.
+export async function groqComplete(env, { system, user, maxTokens = 1200 }) {
+  if (!env.GROQ_API_KEY) throw new HttpError(503, "Нужен GROQ_API_KEY.");
+  const model = env.GROQ_MODEL || "llama-3.3-70b-versatile";
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + env.GROQ_API_KEY },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: "system", content: system }, { role: "user", content: user }],
+      max_tokens: maxTokens,
+      temperature: 0.7,
+    }),
+  });
+  if (!res.ok) throw new HttpError(res.status === 429 ? 429 : 502, "Groq: " + res.status);
+  const data = await res.json();
+  const text = data.choices?.[0]?.message?.content || "";
+  if (!text) throw new HttpError(502, "Groq вернул пустой ответ");
+  return text;
 }
 
 export async function geminiComplete(env, { system, user, maxTokens }) {
