@@ -6,7 +6,7 @@
 //   2) Google Trends (живые запросы по стране) — как доп. сигнал, без ключа.
 import { json, errorResponse, HttpError } from "../../_lib/db.js";
 import { requireAuth } from "../../_lib/auth.js";
-import { aiComplete, aiProvider, geminiGrounded, extractJSON, DROPSHIP_SYSTEM } from "../../_lib/ai.js";
+import { aiProvider, geminiGrounded, geminiComplete, workersAiComplete, extractJSON, DROPSHIP_SYSTEM } from "../../_lib/ai.js";
 
 function esc(s) { return String(s == null ? "" : s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c])); }
 
@@ -77,14 +77,33 @@ export async function onRequestPost({ request, env }) {
     const terms = await fetchGoogleTrends(geo);
     const user = buildPrompt(niche, geo, terms, markup);
 
-    let parsed, sources = [], mode;
+    let parsed, sources = [], mode, warn = "";
+    const runWorkers = async () => {
+      const text = await workersAiComplete(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 1500 });
+      return { parsed: parseIdeas(text), mode: "workers-ai" };
+    };
+
     if (env.GEMINI_API_KEY) {
-      const { text, sources: srcs } = await geminiGrounded(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 2200 });
-      parsed = parseIdeas(text); sources = srcs; mode = "gemini-search";
+      try {
+        // 1) Настоящий поиск в интернете
+        const { text, sources: srcs } = await geminiGrounded(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 2200 });
+        parsed = parseIdeas(text); sources = srcs; mode = "gemini-search";
+      } catch (e1) {
+        warn = e1.status === 429
+          ? "Gemini-поиск упёрся в лимит бесплатного тарифа — идеи собраны без веб-поиска (попробуйте позже)."
+          : "Gemini-поиск сейчас недоступен — идеи собраны без веб-поиска.";
+        try {
+          // 2) Обычный Gemini (без поиска, но со свежими Google Trends в контексте)
+          const text = await geminiComplete(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 1500 });
+          parsed = parseIdeas(text); mode = "gemini";
+        } catch (e2) {
+          // 3) Workers AI
+          if (env.AI) { const r = await runWorkers(); parsed = r.parsed; mode = r.mode; }
+          else throw e1;
+        }
+      }
     } else {
-      // Workers AI не ходит в интернет — идеи на основе знаний модели + живых Google Trends запросов.
-      const text = await aiComplete(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 1500 });
-      parsed = parseIdeas(text); mode = "workers-ai";
+      const r = await runWorkers(); parsed = r.parsed; mode = r.mode;
     }
 
     let telegramSent = false;
@@ -100,6 +119,7 @@ export async function onRequestPost({ request, env }) {
     return json({
       ok: true, mode, geo, niche: niche || null,
       grounded: mode === "gemini-search",
+      warn: warn || null,
       trends: terms.slice(0, 10),
       ideas: parsed.ideas, note: parsed.note || "", raw: parsed.raw || null,
       sources, telegramSent,

@@ -437,9 +437,12 @@ async function runTrendIdeas() {
     });
     const d = await r.json();
     if (!d.ok) throw new Error(d.error);
-    modeEl.innerHTML = (d.grounded
-      ? "🔎 Реальный поиск в интернете (Gemini)"
-      : "⚡ На основе модели + Google Trends. Для настоящего поиска в интернете добавь бесплатный <b>GEMINI_API_KEY</b>.")
+    let label;
+    if (d.grounded) label = "🔎 Реальный поиск в интернете (Gemini)";
+    else if (d.mode === "gemini") label = "🧠 Gemini + Google Trends (без веб-поиска)";
+    else label = "⚡ На основе модели + Google Trends. Для веб-поиска добавь бесплатный <b>GEMINI_API_KEY</b>.";
+    modeEl.innerHTML = label
+      + (d.warn ? ` · <span style="color:#f59e0b">⚠️ ${esc(d.warn)}</span>` : "")
       + (d.telegramSent ? " · ✅ отправлено в Telegram" : "");
     if (!d.ideas.length) {
       box.innerHTML = `<div class="msg info">ИИ не вернул структурированные идеи.${d.raw ? "<br><br>" + esc(d.raw) : ""}</div>`;
