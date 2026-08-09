@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Политика конфиденциальности</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111214'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' fill='%23ff4d1c' transform='rotate(45 16 16)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/store.css">
+</head>
+<body>
+<div class="topline"></div>
+
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <a href="/" class="logo"><span class="dot"></span><span data-site-name>SHOP</span></a>
+    <div class="hdr-actions" style="margin-left:auto">
+      <a class="icon-btn" href="/">← В каталог</a>
+      <a class="icon-btn" data-tg href="#" target="_blank" rel="noopener">Telegram</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap page">
+  <div class="page-head">
+    <span class="kicker">Юридическая информация</span>
+    <h1>Политика конфиденциальности</h1>
+    <p>Как <span data-site-name>магазин</span> собирает, использует и защищает ваши данные.</p>
+  </div>
+  <div class="prose">
+    <div class="note">Это шаблон. Замените реквизиты и контакты (в <code>assets/js/config.js</code>) на свои и при необходимости адаптируйте текст под ваше законодательство.</div>
+
+    <h2>1. Общие положения</h2>
+    <p>Настоящая Политика определяет порядок обработки и защиты персональных данных пользователей сайта. Оставляя заявку или оформляя заказ, вы соглашаетесь с условиями этой Политики.</p>
+
+    <h2>2. Какие данные мы собираем</h2>
+    <ul>
+      <li>Имя, номер телефона и/или контакт в мессенджере — для связи и оформления заказа;</li>
+      <li>Состав заказа и комментарии к нему;</li>
+      <li>Адрес/отделение доставки — для отправки товара;</li>
+      <li>Технические данные (cookie, обезличенная статистика посещений) — для работы и улучшения сайта.</li>
+    </ul>
+
+    <h2>3. Цели обработки</h2>
+    <ul>
+      <li>Обработка и выполнение заказов;</li>
+      <li>Связь с вами по заказу (звонок, сообщение в Telegram/Viber);</li>
+      <li>Организация доставки и оплаты;</li>
+      <li>Улучшение работы сайта и ассортимента.</li>
+    </ul>
+
+    <h2>4. Передача данных третьим лицам</h2>
+    <p>Мы передаём данные только в объёме, необходимом для выполнения заказа: службе доставки (например, Нова Пошта) и уполномоченному менеджеру. Мы не продаём и не передаём ваши данные для рекламы третьих лиц.</p>
+
+    <h2>5. Хранение и защита</h2>
+    <p>Данные хранятся столько, сколько необходимо для выполнения заказа и требований законодательства. Мы применяем разумные технические и организационные меры для защиты информации от несанкционированного доступа.</p>
+
+    <h2>6. Cookie</h2>
+    <p>Сайт использует cookie для корректной работы (например, сохранение корзины) и обезличенной статистики. Вы можете отключить cookie в настройках браузера, но часть функций может работать некорректно.</p>
+
+    <h2>7. Ваши права</h2>
+    <p>Вы вправе запросить доступ к своим данным, их исправление или удаление, а также отозвать согласие на обработку — написав нам по контактам ниже.</p>
+
+    <h2>8. Контакты</h2>
+    <p>По вопросам обработки данных: <a data-email href="#">email</a>, Telegram <a data-tg href="#" target="_blank" rel="noopener">менеджер</a>.<br>
+    <span data-site-name>Магазин</span> · <span id="legal-name"></span></p>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/site.js"></script>
+<script>document.getElementById('legal-name').textContent = (window.SITE&&SITE.legalName)||'';</script>
+</body>
+</html>
