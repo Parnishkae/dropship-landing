@@ -88,12 +88,14 @@ export async function onRequestPost({ request, env }) {
     if (env.AI) attempts.push({ id: "workers-ai", run: async () => ({ text: await workersAiComplete(env, { system: DROPSHIP_SYSTEM, user, maxTokens: 1500 }), mode: "workers-ai" }) });
 
     let parsed, sources = [], mode, warn = "";
+    const tried = [];
     for (const a of attempts) {
       try {
         const r = await a.run();
         parsed = parseIdeas(r.text); sources = r.sources || []; mode = r.mode;
         break;
       } catch (e) {
+        tried.push(`${a.id}: ${e.message || e.status || "ошибка"}`);
         if (a.id === "gemini-search") {
           warn = e.status === 429
             ? "Gemini-поиск упёрся в лимит бесплатного тарифа — идеи собраны без веб-поиска (попробуйте позже)."
@@ -102,7 +104,10 @@ export async function onRequestPost({ request, env }) {
         // иначе пробуем следующий провайдер
       }
     }
-    if (!parsed) throw new HttpError(503, "ИИ сейчас недоступен, попробуйте позже.");
+    if (!parsed) {
+      throw new HttpError(503, "Все провайдеры ИИ недоступны. Детали: " + (tried.join(" | ") || "нет провайдеров") +
+        ". Проверьте GROQ_API_KEY / GEMINI_API_KEY и binding AI.");
+    }
 
     let telegramSent = false;
     if (notify && parsed.ideas.length) {
