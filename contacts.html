@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Контакты</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111214'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' fill='%23ff4d1c' transform='rotate(45 16 16)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/store.css">
+</head>
+<body>
+<div class="topline"></div>
+
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <a href="/" class="logo"><span class="dot"></span><span data-site-name>SHOP</span></a>
+    <div class="hdr-actions" style="margin-left:auto">
+      <a class="icon-btn" href="/">← В каталог</a>
+      <a class="icon-btn" data-tg href="#" target="_blank" rel="noopener">Telegram</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap page">
+  <div class="page-head">
+    <span class="kicker">Мы на связи</span>
+    <h1>Контакты</h1>
+    <p>Напишите удобным способом — отвечаем быстро.</p>
+  </div>
+  <div class="prose">
+    <div class="contact-cards">
+      <div class="contact-card"><b>Telegram</b><a data-tg href="#" target="_blank" rel="noopener">Написать менеджеру</a></div>
+      <div class="contact-card"><b>Телефон</b><a data-phone href="#">телефон</a></div>
+      <div class="contact-card"><b>Email</b><a data-email href="#">email</a></div>
+    </div>
+    <p><b>Режим работы:</b> ежедневно, 9:00–21:00. Сообщения в Telegram читаем и вне графика.</p>
+    <p><b>Реквизиты:</b> <span id="legal-name"></span><span id="legal-id-wrap"></span></p>
+    <p>Оформить заказ можно прямо в <a href="/">каталоге</a> или через нашего <a data-tg href="#" target="_blank" rel="noopener">Telegram-бота</a>.</p>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/site.js"></script>
+<script>
+  var S = window.SITE || {};
+  document.getElementById('legal-name').textContent = S.legalName || '';
+  if (S.legalId) document.getElementById('legal-id-wrap').textContent = ' · ' + S.legalId;
+</script>
+</body>
+</html>

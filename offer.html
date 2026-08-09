@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Публичная оферта</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111214'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' fill='%23ff4d1c' transform='rotate(45 16 16)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/store.css">
+</head>
+<body>
+<div class="topline"></div>
+
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <a href="/" class="logo"><span class="dot"></span><span data-site-name>SHOP</span></a>
+    <div class="hdr-actions" style="margin-left:auto">
+      <a class="icon-btn" href="/">← В каталог</a>
+      <a class="icon-btn" data-tg href="#" target="_blank" rel="noopener">Telegram</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap page">
+  <div class="page-head">
+    <span class="kicker">Юридическая информация</span>
+    <h1>Публичная оферта</h1>
+    <p>Договор купли-продажи товаров дистанционным способом.</p>
+  </div>
+  <div class="prose">
+    <div class="note">Это шаблон договора. Замените реквизиты продавца на свои и при необходимости адаптируйте под ваше законодательство. При сомнениях проконсультируйтесь с юристом.</div>
+
+    <h2>1. Общие положения</h2>
+    <p>Настоящая оферта является официальным предложением <span id="legal-name"></span> (далее — «Продавец») заключить договор купли-продажи товаров, представленных на сайте. Оформляя заказ, Покупатель принимает условия настоящей оферты в полном объёме.</p>
+
+    <h2>2. Предмет договора</h2>
+    <p>Продавец обязуется передать в собственность Покупателю товар, а Покупатель — принять и оплатить его на условиях настоящей оферты.</p>
+
+    <h2>3. Оформление заказа</h2>
+    <ul>
+      <li>Заказ оформляется на сайте через корзину, Telegram-бота или напрямую менеджеру;</li>
+      <li>После оформления менеджер связывается для подтверждения деталей;</li>
+      <li>Продавец вправе отклонить заказ при отсутствии товара, уведомив Покупателя.</li>
+    </ul>
+
+    <h2>4. Цена и оплата</h2>
+    <p>Цены указаны на сайте в <span data-site-name>магазине</span>. Оплата возможна наложенным платежом при получении, картой или иным согласованным способом. Итоговая стоимость подтверждается менеджером при оформлении.</p>
+
+    <h2>5. Доставка</h2>
+    <p>Доставка осуществляется службами доставки (например, Нова Пошта) по всей стране. Сроки и стоимость — на странице <a href="/delivery.html">Доставка и оплата</a>.</p>
+
+    <h2>6. Возврат и обмен</h2>
+    <p>Покупатель вправе вернуть товар надлежащего качества в течение 14 дней. Условия — на странице <a href="/returns.html">Возврат и обмен</a>.</p>
+
+    <h2>7. Ответственность</h2>
+    <p>Стороны несут ответственность в соответствии с действующим законодательством. Продавец не отвечает за задержки по вине служб доставки.</p>
+
+    <h2>8. Реквизиты продавца</h2>
+    <p><span id="legal-name-2"></span><br>ЕДРПОУ / ИНН: <span id="legal-id"></span><br>Контакт: <a data-tg href="#" target="_blank" rel="noopener">Telegram</a>, <a data-phone data-keep="1" href="#">телефон</a>, <a data-email href="#">email</a>.</p>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/site.js"></script>
+<script>
+  var S = window.SITE || {};
+  document.getElementById('legal-name').textContent = S.legalName || '[Реквизиты продавца]';
+  document.getElementById('legal-name-2').textContent = S.legalName || '[Реквизиты продавца]';
+  document.getElementById('legal-id').textContent = S.legalId || '[—]';
+  document.querySelectorAll('[data-phone][data-keep]').forEach(function(e){ e.textContent = S.phone || 'телефон'; });
+</script>
+</body>
+</html>

@@ -4,11 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Собрать набор — магазин</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111214'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' fill='%23ff4d1c' transform='rotate(45 16 16)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/store.css">
 </head>
 <body>
+<div class="topline"></div>
 
 <header class="hdr">
   <div class="wrap hdr-in">
@@ -22,17 +25,12 @@
 
 <main class="wrap" id="bd-root" style="padding-bottom:120px"><div class="state"><h3>Загрузка…</h3></div></main>
 
-<footer>
-  <div class="wrap foot-in">
-    <a href="/" class="logo"><span class="dot"></span><span data-site-name>SHOP</span></a>
-    <span class="muted">© <span id="year"></span></span>
-  </div>
-</footer>
+<footer class="site-footer" id="site-footer"></footer>
 
 <div class="toast" id="toast"></div>
 
 <script src="/assets/js/config.js"></script>
 <script src="/assets/js/bundle.js"></script>
-<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<script src="/assets/js/site.js"></script>
 </body>
 </html>
