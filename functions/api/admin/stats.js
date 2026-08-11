@@ -17,13 +17,20 @@ export async function onRequestGet({ request, env }) {
     totals.available = (await db.prepare("SELECT COUNT(*) c FROM products WHERE available=1").first())?.c || 0;
     totals.categories = (await db.prepare("SELECT COUNT(DISTINCT category) c FROM products WHERE category IS NOT NULL AND category != ''").first())?.c || 0;
 
-    const ordAll = await db.prepare("SELECT COUNT(*) c, COALESCE(SUM(total),0) s FROM orders").first();
-    totals.ordersAll = ordAll?.c || 0;
-    totals.revenueAll = ordAll?.s || 0;
+    // Выручка = только ВЫПОЛНЕННЫЕ заказы (status='done'). Заявки — отдельно.
+    const leadsAll = (await db.prepare("SELECT COUNT(*) c FROM orders").first())?.c || 0;
+    const doneAll = await db.prepare("SELECT COUNT(*) c, COALESCE(SUM(total),0) s FROM orders WHERE status='done'").first();
+    totals.leadsAll = leadsAll;
+    totals.doneAll = doneAll?.c || 0;
+    totals.revenueAll = doneAll?.s || 0;
 
-    const ordPeriod = await db.prepare("SELECT COUNT(*) c, COALESCE(SUM(total),0) s FROM orders WHERE created_at >= ?").bind(since).first();
-    const ordersPeriod = ordPeriod?.c || 0;
-    const revenuePeriod = ordPeriod?.s || 0;
+    const leadsP = (await db.prepare("SELECT COUNT(*) c FROM orders WHERE created_at >= ?").bind(since).first())?.c || 0;
+    const doneP = await db.prepare("SELECT COUNT(*) c, COALESCE(SUM(total),0) s FROM orders WHERE status='done' AND created_at >= ?").bind(since).first();
+    const pipeP = (await db.prepare("SELECT COALESCE(SUM(total),0) s FROM orders WHERE status IN ('new','confirmed') AND created_at >= ?").bind(since).first())?.s || 0;
+    const leadsPeriod = leadsP;
+    const donePeriod = doneP?.c || 0;
+    const revenuePeriod = doneP?.s || 0;
+    const pipelinePeriod = pipeP;
 
     // Счётчики событий за период
     const evRows = await db.prepare(
@@ -35,14 +42,16 @@ export async function onRequestGet({ request, env }) {
     const productViews = ev.product_view || 0;
     const addToCart = ev.add_to_cart || 0;
 
-    // Воронка конверсии
+    // Воронка конверсии. leads = заявки (все заказы), completed = выполненные.
     const conversion = {
       productViews,
       addToCart,
-      orders: ordersPeriod,
+      leads: leadsPeriod,
+      completed: donePeriod,
       viewToCart: productViews ? +(addToCart / productViews * 100).toFixed(1) : 0,
-      cartToOrder: addToCart ? +(ordersPeriod / addToCart * 100).toFixed(1) : 0,
-      viewToOrder: productViews ? +(ordersPeriod / productViews * 100).toFixed(1) : 0,
+      cartToLead: addToCart ? +(leadsPeriod / addToCart * 100).toFixed(1) : 0,
+      viewToLead: productViews ? +(leadsPeriod / productViews * 100).toFixed(1) : 0,
+      leadToDone: leadsPeriod ? +(donePeriod / leadsPeriod * 100).toFixed(1) : 0,
     };
 
     // Дневной ряд (события + заказы)
@@ -89,7 +98,7 @@ export async function onRequestGet({ request, env }) {
     return json({
       ok: true,
       days,
-      totals: { ...totals, ordersPeriod, revenuePeriod, pageviews, productViews, addToCart },
+      totals: { ...totals, leadsPeriod, donePeriod, revenuePeriod, pipelinePeriod, pageviews, productViews, addToCart },
       conversion,
       series,
       topViewed: topViewed.results || [],

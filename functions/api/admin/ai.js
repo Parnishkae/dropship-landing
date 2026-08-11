@@ -7,7 +7,8 @@ async function gatherSummary(db, days) {
   const since = Date.now() - days * 86400000;
   const products = (await db.prepare("SELECT COUNT(*) c FROM products").first())?.c || 0;
   const available = (await db.prepare("SELECT COUNT(*) c FROM products WHERE available=1").first())?.c || 0;
-  const ord = await db.prepare("SELECT COUNT(*) c, COALESCE(SUM(total),0) s FROM orders WHERE created_at >= ?").bind(since).first();
+  const leads = await db.prepare("SELECT COUNT(*) c FROM orders WHERE created_at >= ?").bind(since).first();
+  const done = await db.prepare("SELECT COUNT(*) c, COALESCE(SUM(total),0) s FROM orders WHERE status='done' AND created_at >= ?").bind(since).first();
   const ev = await db.prepare("SELECT type, COUNT(*) c FROM events WHERE ts >= ? GROUP BY type").bind(since).all();
   const evMap = {};
   for (const r of (ev.results || [])) evMap[r.type] = r.c;
@@ -30,8 +31,9 @@ async function gatherSummary(db, days) {
     products, available, unavailable: products - available,
     productsWithoutImage: noImages,
     productsWithoutPrice: noPrice,
-    orders: ord?.c || 0,
-    revenue: ord?.s || 0,
+    leads: leads?.c || 0,
+    orders: done?.c || 0,
+    revenue: done?.s || 0,
     pageviews: evMap.pageview || 0,
     productViews: evMap.product_view || 0,
     addToCart: evMap.add_to_cart || 0,
@@ -43,24 +45,27 @@ async function gatherSummary(db, days) {
 
 function heuristic(s) {
   const tips = [];
-  const cr = s.productViews ? (s.orders / s.productViews * 100) : 0;
+  const cr = s.productViews ? (s.leads / s.productViews * 100) : 0;
   const cartRate = s.productViews ? (s.addToCart / s.productViews * 100) : 0;
+  const doneRate = s.leads ? (s.orders / s.leads * 100) : 0;
 
   if (s.products === 0) tips.push("В каталоге нет товаров — загрузите XML-фид в разделе «Импорт», чтобы витрина ожила.");
   if (s.productsWithoutImage > 0) tips.push(`У ${s.productsWithoutImage} товаров нет изображения. Карточки без фото почти не покупают — добавьте картинки в фиде.`);
   if (s.productsWithoutPrice > 0) tips.push(`У ${s.productsWithoutPrice} товаров не указана цена. Проверьте теги <price> в XML.`);
   if (s.unavailable > s.available && s.products > 0) tips.push("Больше половины каталога помечено как «нет в наличии» — обновите фид, чтобы не терять трафик.");
   if (s.pageviews > 30 && s.productViews / Math.max(s.pageviews, 1) < 0.3) tips.push("Посетители заходят, но редко открывают карточки товара. Поработайте над превью на главной: фото, цена, короткое название.");
-  if (s.addToCart > 5 && cr < 20) tips.push(`Конверсия из корзины в заказ ${cr.toFixed(1)}% — низкая. Упростите оформление и добавьте быстрый контакт (Telegram) прямо в корзине.`);
+  if (s.addToCart > 5 && cr < 20) tips.push(`Конверсия из корзины в заявку ${cr.toFixed(1)}% — низкая. Упростите оформление и добавьте быстрый контакт (Telegram) прямо в корзине.`);
+  if (s.leads > 3 && doneRate < 50) tips.push(`Из ${s.leads} заявок выкуплено только ${s.orders} (${doneRate.toFixed(0)}%). Быстрее связывайтесь с клиентом после заявки и подтверждайте заказ — так меньше «отвалов».`);
   if (s.searches > s.productViews && s.searches > 10) tips.push("Много поиска, мало просмотров — вероятно, люди не находят нужное. Проверьте названия и категории товаров.");
   if (s.topViewed.length) tips.push(`Хит просмотров: «${s.topViewed[0].title}». Продвигайте его в Telegram и вынесите на главную.`);
   if (!tips.length) tips.push("Данных пока мало для выводов. Дайте магазину поработать несколько дней и заходите за аналитикой снова.");
 
   return {
-    headline: `За ${s.days} дн.: ${s.productViews} просмотров товаров, ${s.orders} заказов, выручка ${s.revenue} грн.`,
+    headline: `За ${s.days} дн.: ${s.productViews} просмотров, ${s.leads} заявок, ${s.orders} выкуплено, выручка ${s.revenue} грн.`,
     metrics: {
       "Конверсия в корзину": `${cartRate.toFixed(1)}%`,
-      "Конверсия в заказ": `${cr.toFixed(1)}%`,
+      "Конверсия в заявку": `${cr.toFixed(1)}%`,
+      "Выкуп заявок": `${doneRate.toFixed(1)}%`,
       "Товаров в каталоге": `${s.available} / ${s.products}`,
     },
     recommendations: tips,

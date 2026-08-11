@@ -32,6 +32,7 @@ function switchTab(name) {
   $$(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
   $$(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + name));
   if (name === "products") loadProducts();
+  if (name === "orders") loadOrders();
   if (name === "bundles") { loadBundleList(); tgStatus(); }
   if (name === "stats") loadStats();
   if (name === "ai") loadPicks();
@@ -270,6 +271,84 @@ async function clearAll() {
   loadProducts();
 }
 
+// ============ ORDERS ============
+const ORD_STATUSES = [
+  { v: "new", l: "🆕 Заявка" },
+  { v: "confirmed", l: "📞 Подтверждён" },
+  { v: "done", l: "✅ Выполнен" },
+  { v: "cancelled", l: "✖ Отменён" },
+];
+
+async function loadOrders() {
+  const status = $("#ord-filter").value;
+  const body = $("#ord-body");
+  body.innerHTML = `<tr><td colspan="5" class="state">Загрузка…</td></tr>`;
+  try {
+    const r = await fetch("/api/admin/orders?limit=100" + (status ? "&status=" + status : ""));
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error);
+    $("#ord-total").textContent = d.total;
+    renderOrderSummary(d.byStatus || {});
+    if (!d.orders.length) { body.innerHTML = `<tr><td colspan="5" class="state">Заказов нет</td></tr>`; return; }
+    body.innerHTML = d.orders.map(orderRowHTML).join("");
+    bindOrderRows();
+  } catch (e) {
+    body.innerHTML = `<tr><td colspan="5" class="state">Ошибка: ${esc(e.message)}</td></tr>`;
+  }
+}
+
+function renderOrderSummary(by) {
+  const done = by.done || { count: 0, total: 0 };
+  const pipe = ["new", "confirmed"].reduce((a, k) => a + ((by[k] && by[k].total) || 0), 0);
+  const cards = [
+    { v: (by.new && by.new.count) || 0, l: "Новые заявки" },
+    { v: (by.confirmed && by.confirmed.count) || 0, l: "Подтверждены" },
+    { v: done.count, l: "Выполнено", a: true },
+    { v: money(done.total), l: "Выручка (выкуп)", a: true },
+    { v: money(pipe), l: "В работе" },
+    { v: (by.cancelled && by.cancelled.count) || 0, l: "Отменены" },
+  ];
+  $("#ord-summary").innerHTML = cards.map((k) => `<div class="kpi"><div class="v ${k.a ? "accent" : ""}">${k.v}</div><div class="l">${k.l}</div></div>`).join("");
+}
+
+function orderRowHTML(o) {
+  const items = (o.items || []).map((i) => esc(i.title)).join(", ");
+  const date = o.created_at ? new Date(o.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "2-digit" }) : "";
+  const opts = ORD_STATUSES.map((s) => `<option value="${s.v}" ${s.v === o.status ? "selected" : ""}>${s.l}</option>`).join("");
+  return `<tr data-id="${esc(o.id)}" data-status="${esc(o.status)}">
+    <td>${esc(o.name || "—")}<br><small style="color:var(--muted)">${esc(o.phone || o.contact || "")}</small></td>
+    <td style="max-width:260px"><small>${esc(items).slice(0, 90) || "—"}</small></td>
+    <td style="white-space:nowrap;font-weight:700">${money(o.total, o.currency)}</td>
+    <td><select class="input ord-status" data-ord-status style="width:auto;padding:6px 10px">${opts}</select></td>
+    <td style="white-space:nowrap;color:var(--muted)">${date}</td>
+  </tr>`;
+}
+
+function bindOrderRows() {
+  $$("#ord-body tr").forEach((tr) => {
+    const id = tr.dataset.id;
+    const sel = $("[data-ord-status]", tr);
+    if (!sel) return;
+    sel.onchange = async () => {
+      const status = sel.value;
+      sel.disabled = true;
+      try {
+        const r = await fetch("/api/admin/orders", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, status }) });
+        const d = await r.json();
+        if (!d.ok) throw new Error(d.error);
+        tr.dataset.status = status;
+        // Обновим сводку/фильтр, чтобы выручка пересчиталась сразу
+        loadOrders();
+      } catch (e) {
+        alert("Не удалось сменить статус: " + e.message);
+        sel.value = tr.dataset.status;
+      } finally {
+        sel.disabled = false;
+      }
+    };
+  });
+}
+
 // ============ STATS ============
 async function loadStats() {
   const days = $("#stats-days").value;
@@ -288,10 +367,10 @@ async function loadStats() {
 function renderStats(d) {
   const t = d.totals, c = d.conversion;
   const kpis = [
-    { v: t.products, l: "Товаров в каталоге" },
-    { v: t.available, l: "В наличии" },
-    { v: t.ordersPeriod, l: `Заказов / ${d.days} дн.`, a: true },
-    { v: money(t.revenuePeriod), l: "Выручка за период", a: true },
+    { v: t.leadsPeriod, l: `Заявок / ${d.days} дн.` },
+    { v: t.donePeriod, l: "Выкуплено (выполнено)", a: true },
+    { v: money(t.revenuePeriod), l: "Выручка (только выкуп)", a: true },
+    { v: money(t.pipelinePeriod), l: "В работе (не выкуплено)" },
     { v: t.productViews, l: "Просмотров товаров" },
     { v: t.pageviews, l: "Визитов" },
   ];
@@ -303,7 +382,8 @@ function renderStats(d) {
         <div class="funnel">
           <div class="f"><div><div class="n">${c.productViews}</div><small>Просмотры товаров</small></div></div>
           <div class="f"><div><div class="n">${c.addToCart}</div><small>В корзину — ${c.viewToCart}%</small></div></div>
-          <div class="f"><div><div class="n">${c.orders}</div><small>Заказы — ${c.viewToOrder}% от просмотров</small></div></div>
+          <div class="f"><div><div class="n">${c.leads}</div><small>Заявки — ${c.viewToLead}% от просмотров</small></div></div>
+          <div class="f"><div><div class="n">${c.completed}</div><small>Выкуплено — ${c.leadToDone}% из заявок</small></div></div>
         </div>
       </div>
     </div>
@@ -327,7 +407,7 @@ function lineChart(series) {
     <path d="${ordPath}" fill="none" stroke="#22c55e" stroke-width="2.5"/>
   </svg>
   <div style="display:flex;gap:16px;font-size:.8rem;color:var(--muted);margin-top:6px">
-    <span><b style="color:var(--accent)">—</b> просмотры</span><span><b style="color:#22c55e">—</b> заказы ×5</span>
+    <span><b style="color:var(--accent)">—</b> просмотры</span><span><b style="color:#22c55e">—</b> заявки ×5</span>
   </div>`;
 }
 
@@ -596,6 +676,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#prod-search").addEventListener("input", () => { clearTimeout(window._ps); window._ps = setTimeout(loadProducts, 350); });
   $("#prod-clear").addEventListener("click", clearAll);
   $("#prod-refresh").addEventListener("click", loadProducts);
+
+  // orders
+  $("#ord-filter").addEventListener("change", loadOrders);
+  $("#ord-refresh").addEventListener("click", loadOrders);
 
   // bundles
   $("#bnd-mode").addEventListener("change", bndSyncMode);

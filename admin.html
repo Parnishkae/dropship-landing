@@ -36,6 +36,7 @@
       <div class="tabs">
         <button class="tab active" data-tab="import">📥 Импорт</button>
         <button class="tab" data-tab="products">📦 Товары</button>
+        <button class="tab" data-tab="orders">🧾 Заказы</button>
         <button class="tab" data-tab="bundles">🎁 Наборы</button>
         <button class="tab" data-tab="stats">📊 Статистика</button>
         <button class="tab" data-tab="ai">🤖 ИИ-аналитика</button>
@@ -86,6 +87,29 @@
         <table class="tbl">
           <thead><tr><th>Фото</th><th>Название</th><th>Цена</th><th>Статус</th><th></th><th></th></tr></thead>
           <tbody id="prod-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ORDERS -->
+    <section class="panel" id="panel-orders">
+      <h2 class="sec">Заказы <span class="sub" style="font-size:.9rem">(<span id="ord-total">0</span>)</span></h2>
+      <p class="sub">Заявка становится выручкой только когда вы отметите её как «Выполнен». Так статистика показывает реальные продажи, а не тех, кто просто добавил в корзину.</p>
+      <div id="ord-summary" class="kpis" style="margin-bottom:14px"></div>
+      <div class="toolbar2">
+        <select class="input" id="ord-filter" style="width:auto">
+          <option value="">Все статусы</option>
+          <option value="new">🆕 Новые заявки</option>
+          <option value="confirmed">📞 Подтверждённые</option>
+          <option value="done">✅ Выполненные</option>
+          <option value="cancelled">✖ Отменённые</option>
+        </select>
+        <button class="btn btn-line" id="ord-refresh">Обновить</button>
+      </div>
+      <div class="card" style="padding:0;overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>Клиент</th><th>Состав</th><th>Сумма</th><th>Статус</th><th>Дата</th></tr></thead>
+          <tbody id="ord-body"></tbody>
         </table>
       </div>
     </section>
@@ -147,7 +171,7 @@
           <option value="90">90 дней</option>
         </select>
       </div>
-      <p class="sub">Просмотры, заказы, выручка и воронка конверсии. Данные собираются автоматически при посещении витрины.</p>
+      <p class="sub">Заявки, выкуп, выручка и воронка конверсии. Выручка считается только по заказам со статусом «Выполнен» — заявки в корзине не считаются продажей. Управлять статусами — во вкладке «Заказы».</p>
       <div id="stats-root"><div class="state">Загрузка…</div></div>
     </section>
 

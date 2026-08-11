@@ -77,9 +77,12 @@ export async function ensureSchema(db) {
   for (const sql of [
     "ALTER TABLE products ADD COLUMN cost REAL",
     "ALTER TABLE products ADD COLUMN featured INTEGER DEFAULT 0",
+    "ALTER TABLE orders ADD COLUMN status TEXT DEFAULT 'new'",
   ]) {
     try { await db.prepare(sql).run(); } catch (_) { /* колонка уже есть */ }
   }
+  // Заказы без статуса (созданные до миграции) считаем новыми заявками.
+  try { await db.prepare("UPDATE orders SET status='new' WHERE status IS NULL OR status=''").run(); } catch (_) {}
   schemaReady = true;
 }
 
